@@ -2,9 +2,10 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
-    - avoid_print
-    - prefer_const_constructors
-    - prefer_final_fields
-    - avoid_redundant_argument_values
-    - always_use_package_imports
-    - prefer_single_quotes
+    avoid_print: true
+    prefer_const_constructors: true
+    prefer_final_fields: true
+    avoid_redundant_argument_values: true
+    always_use_package_imports: true
+    prefer_single_quotes: true
+    use_null_aware_elements: false
