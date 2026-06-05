@@ -1,0 +1,21 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/auth/login",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$[?(@.username == 'errado@example.com')]"
+      }
+    ]
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "message": "Invalid credentials"
+    }
+  }
+}

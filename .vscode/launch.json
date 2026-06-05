@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Integration Tests",
+      "request": "launch",
+      "type": "dart",
+      "program": "integration_test/auth_test.dart",
+      "args": ["--dart-define=API_BASE_URL=http://localhost:8080"]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "urlPath": "/auth/login"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLTEiLCJlbWFpbCI6ImRlbW9AZGVtby5sb2NhbCIsImlhdCI6MTc0ODk5NTIwMCwiZXhwIjo5OTk5OTk5OTk5fQ.fakesig",
+      "refresh_token": "demo-refresh-token"
+    }
+  }
+}
