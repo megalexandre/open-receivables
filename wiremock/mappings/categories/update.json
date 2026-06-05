@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/categories/.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "cat-1",
+      "name": "Categoria Atualizada",
+      "group": "Group A",
+      "water_meter": true,
+      "water_value": 50.00,
+      "member_value": 3.00
+    }
+  }
+}

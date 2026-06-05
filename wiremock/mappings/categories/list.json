@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/categories"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        { "id": "cat-1", "name": "Residencial Padrão", "group": "Group A", "water_meter": true, "water_value": 50.00, "member_value": 3.00 },
+        { "id": "cat-2", "name": "Comercial", "group": "Group B", "water_meter": true, "water_value": 54.00, "member_value": 6.00 },
+        { "id": "cat-3", "name": "Industrial", "group": "Group B", "water_meter": true, "water_value": 97.00, "member_value": 10.00 },
+        { "id": "cat-4", "name": "Social", "group": "Group C", "water_meter": false, "water_value": 15.00, "member_value": 0.00 },
+        { "id": "cat-5", "name": "Rural", "group": "Group A", "water_meter": true, "water_value": 24.00, "member_value": 2.00 }
+      ],
+      "total": 24,
+      "page": 1,
+      "pageSize": 5
+    }
+  }
+}

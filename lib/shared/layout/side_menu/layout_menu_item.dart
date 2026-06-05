@@ -58,5 +58,7 @@ class LayoutMenuItem {
     'search': Icons.search,
     'receipt_long': Icons.receipt_long,
     'history': Icons.history,
+    'category': Icons.category,
+    'home': Icons.home,
   };
 }

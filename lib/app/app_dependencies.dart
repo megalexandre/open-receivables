@@ -5,6 +5,8 @@ import 'package:organizagrana/features/auth/data/auth_access_token_provider.dart
 import 'package:organizagrana/features/auth/data/auth_api_client.dart';
 import 'package:organizagrana/features/auth/data/auth_service.dart';
 import 'package:organizagrana/features/auth/data/auth_storage.dart';
+import 'package:organizagrana/features/categories/data/categories_api_client.dart';
+import 'package:organizagrana/features/categories/data/categories_service.dart';
 import 'package:organizagrana/shared/network/http_api_client.dart';
 
 /// Composition root da aplicação: monta a sessão e o roteador.
@@ -30,14 +32,17 @@ class AppDependencies {
     final authService = AuthService(authStorage, apiClient: authApiClient);
     final session = AuthSessionController(authService: authService);
 
-    // ignore: unused_local_variable — disponível para as features injetarem
     final featureHttpApiClient = HttpApiClient(
       httpClient: httpClient,
       bearerTokenProvider: tokenProvider.readAccessToken,
       tokenRefresher: authService.refreshAccessToken,
     );
 
-    final router = AppRouter(session);
+    final categoriesService = CategoriesService(
+      apiClient: HttpCategoriesApiClient(httpClient: featureHttpApiClient),
+    );
+
+    final router = AppRouter(session, categoriesService: categoriesService);
 
     return AppDependencies._(session: session, router: router);
   }

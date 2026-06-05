@@ -15,6 +15,9 @@ class AuthApiClientException implements Exception {
 
   const AuthApiClientException(this.type);
 
+  @override
+  String toString() => message;
+
   String get message => switch (type) {
         AuthFailureType.invalidCredentials => 'Credenciais invalidas.',
         AuthFailureType.sessionExpired =>

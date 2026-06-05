@@ -1,3 +1,4 @@
 [
-  { "type": "item", "id": "home", "label": "Home", "icon": "home" }
+  { "type": "item", "id": "home", "label": "Home", "icon": "home" },
+  { "type": "item", "id": "categories", "label": "Categorias", "icon": "category" }
 ]
