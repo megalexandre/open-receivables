@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/members"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "mem-new",
+      "member_number": "#10600",
+      "name": "Novo Sócio",
+      "document": "000.000.000-00",
+      "active": true
+    }
+  }
+}

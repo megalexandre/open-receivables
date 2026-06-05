@@ -7,6 +7,8 @@ import 'package:organizagrana/features/auth/data/auth_service.dart';
 import 'package:organizagrana/features/auth/data/auth_storage.dart';
 import 'package:organizagrana/features/categories/data/categories_api_client.dart';
 import 'package:organizagrana/features/categories/data/categories_service.dart';
+import 'package:organizagrana/features/members/data/members_api_client.dart';
+import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/shared/network/http_api_client.dart';
 
 /// Composition root da aplicação: monta a sessão e o roteador.
@@ -42,7 +44,15 @@ class AppDependencies {
       apiClient: HttpCategoriesApiClient(httpClient: featureHttpApiClient),
     );
 
-    final router = AppRouter(session, categoriesService: categoriesService);
+    final membersService = MembersService(
+      apiClient: HttpMembersApiClient(httpClient: featureHttpApiClient),
+    );
+
+    final router = AppRouter(
+      session,
+      categoriesService: categoriesService,
+      membersService: membersService,
+    );
 
     return AppDependencies._(session: session, router: router);
   }

@@ -20,6 +20,8 @@ class AppPagination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final totalPages = _totalPages;
+
     return Row(
       children: [
         Text(
@@ -28,61 +30,33 @@ class AppPagination extends StatelessWidget {
         ),
         const Spacer(),
         IconButton(
+          icon: const Icon(Icons.first_page),
+          tooltip: 'Primeira página',
+          onPressed: page > 1 ? () => onPageChanged(1) : null,
+        ),
+        IconButton(
           icon: const Icon(Icons.chevron_left),
+          tooltip: 'Página anterior',
           onPressed: page > 1 ? () => onPageChanged(page - 1) : null,
         ),
-        ...List.generate(_totalPages, (i) {
-          final p = i + 1;
-          return _PageButton(
-            page: p,
-            selected: p == page,
-            onTap: () => onPageChanged(p),
-          );
-        }),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          onPressed: page < _totalPages ? () => onPageChanged(page + 1) : null,
-        ),
-      ],
-    );
-  }
-}
-
-class _PageButton extends StatelessWidget {
-  const _PageButton({
-    required this.page,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final int page;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Container(
-        width: 32,
-        height: 32,
-        alignment: Alignment.center,
-        decoration: selected
-            ? BoxDecoration(
-                color: theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(4),
-              )
-            : null,
-        child: Text(
-          '$page',
-          style: TextStyle(
-            color: selected ? theme.colorScheme.onPrimary : null,
-            fontWeight: selected ? FontWeight.bold : null,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'Página $page de $totalPages',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
-      ),
+        IconButton(
+          icon: const Icon(Icons.chevron_right),
+          tooltip: 'Próxima página',
+          onPressed: page < totalPages ? () => onPageChanged(page + 1) : null,
+        ),
+        IconButton(
+          icon: const Icon(Icons.last_page),
+          tooltip: 'Última página',
+          onPressed: page < totalPages ? () => onPageChanged(totalPages) : null,
+        ),
+      ],
     );
   }
 }

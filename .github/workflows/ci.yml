@@ -21,4 +21,27 @@ jobs:
 
       - run: flutter test
 
+      - name: Start WireMock
+        run: docker compose up -d wiremock
+
+      - name: Wait for WireMock to be ready
+        run: |
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8080/__admin/health && break
+            echo "Waiting for WireMock... ($i)"
+            sleep 2
+          done
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y libgtk-3-dev libblkid-dev liblzma-dev ninja-build cmake
+
+      - name: Run integration tests
+        run: flutter test integration_test/ -d linux
+
+      - name: Stop WireMock
+        if: always()
+        run: docker compose down
+
       - run: flutter build web --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}

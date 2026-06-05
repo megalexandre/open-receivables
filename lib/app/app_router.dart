@@ -4,6 +4,8 @@ import 'package:organizagrana/app/auth_session_controller.dart';
 import 'package:organizagrana/features/auth/presentation/pages/login_page.dart';
 import 'package:organizagrana/features/categories/data/categories_service.dart';
 import 'package:organizagrana/features/categories/presentation/pages/categories_page.dart';
+import 'package:organizagrana/features/members/data/members_service.dart';
+import 'package:organizagrana/features/members/presentation/pages/members_page.dart';
 import 'package:organizagrana/features/home/presentation/pages/home_page.dart';
 import 'package:organizagrana/shared/layout/layout_page.dart';
 import 'package:organizagrana/shared/layout/side_menu/layout_menu_config.dart';
@@ -12,10 +14,11 @@ import 'package:organizagrana/shared/layout/side_menu/layout_menu_item.dart';
 final RouteObserver<ModalRoute<void>> appRouteObserver = RouteObserver<ModalRoute<void>>();
 
 class AppRouter {
-  AppRouter(this._session, {required this.categoriesService});
+  AppRouter(this._session, {required this.categoriesService, required this.membersService});
 
   final AuthSessionController _session;
   final CategoriesService categoriesService;
+  final MembersService membersService;
 
   // Instância, não estático: um GlobalKey de navigator estático sobrevive a hot
   // reloads e é o gatilho clássico de "Duplicate GlobalKey" no go_router.
@@ -25,6 +28,7 @@ class AppRouter {
   static const String loginPath = '/login';
   static const String homePath = '/home';
   static const String categoriesPath = '/categories';
+  static const String membersPath = '/members';
 
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -83,6 +87,12 @@ class AppRouter {
             path: categoriesPath,
             pageBuilder: (context, state) => NoTransitionPage(
               child: CategoriesPage(service: categoriesService),
+            ),
+          ),
+          GoRoute(
+            path: membersPath,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: MembersPage(service: membersService),
             ),
           ),
         ],
