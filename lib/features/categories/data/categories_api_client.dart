@@ -40,7 +40,7 @@ class HttpCategoriesApiClient implements CategoriesApiClient {
     final params = <String, String>{
       'page': '$page',
       'pageSize': '$pageSize',
-      if (sortBy case final s?) 'sortBy': s,
+      if (sortBy != null) 'sortBy': sortBy,
       if (sortBy != null) 'sortOrder': sortAscending ? 'asc' : 'desc',
     };
     final uri = Uri.parse(ApiEndpoints.categories.list)

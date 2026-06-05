@@ -40,7 +40,7 @@ class HttpMembersApiClient implements MembersApiClient {
     final params = <String, String>{
       'page': '$page',
       'pageSize': '$pageSize',
-      if (sortBy != null) 'sortBy': sortBy,
+      if (sortBy case final s?) 'sortBy': s,
       if (sortBy != null) 'sortOrder': sortAscending ? 'asc' : 'desc',
     };
     final uri = Uri.parse(ApiEndpoints.members.list)
