@@ -1,5 +1,7 @@
 [
   { "type": "item", "id": "home", "label": "Home", "icon": "home" },
   { "type": "item", "id": "members", "label": "Sócios", "icon": "group" },
-  { "type": "item", "id": "categories", "label": "Categorias", "icon": "category" }
+  { "type": "item", "id": "addresses", "label": "Logradouros", "icon": "location_on" },
+  { "type": "item", "id": "categories", "label": "Categorias", "icon": "category" },
+  { "type": "item", "id": "boletos", "label": "Financeiro", "icon": "receipt_long" }
 ]

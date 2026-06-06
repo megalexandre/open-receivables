@@ -1,0 +1,8 @@
+{
+  "request": { "method": "POST", "urlPath": "/addresses" },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "id": "addr-new", "type": "Rua", "name": "Novo Endereço", "base_cep": "00000-000" }
+  }
+}

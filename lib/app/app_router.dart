@@ -4,6 +4,10 @@ import 'package:organizagrana/app/auth_session_controller.dart';
 import 'package:organizagrana/features/auth/presentation/pages/login_page.dart';
 import 'package:organizagrana/features/categories/data/categories_service.dart';
 import 'package:organizagrana/features/categories/presentation/pages/categories_page.dart';
+import 'package:organizagrana/features/addresses/data/addresses_service.dart';
+import 'package:organizagrana/features/addresses/presentation/pages/addresses_page.dart';
+import 'package:organizagrana/features/boletos/data/boletos_service.dart';
+import 'package:organizagrana/features/boletos/presentation/pages/boletos_page.dart';
 import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/features/members/presentation/pages/members_page.dart';
 import 'package:organizagrana/features/home/presentation/pages/home_page.dart';
@@ -14,11 +18,18 @@ import 'package:organizagrana/shared/layout/side_menu/layout_menu_item.dart';
 final RouteObserver<ModalRoute<void>> appRouteObserver = RouteObserver<ModalRoute<void>>();
 
 class AppRouter {
-  AppRouter(this._session, {required this.categoriesService, required this.membersService});
+  AppRouter(this._session, {
+    required this.categoriesService,
+    required this.membersService,
+    required this.addressesService,
+    required this.boletosService,
+  });
 
   final AuthSessionController _session;
   final CategoriesService categoriesService;
   final MembersService membersService;
+  final AddressesService addressesService;
+  final BoletosService boletosService;
 
   // Instância, não estático: um GlobalKey de navigator estático sobrevive a hot
   // reloads e é o gatilho clássico de "Duplicate GlobalKey" no go_router.
@@ -29,6 +40,8 @@ class AppRouter {
   static const String homePath = '/home';
   static const String categoriesPath = '/categories';
   static const String membersPath = '/members';
+  static const String addressesPath = '/addresses';
+  static const String boletosPath = '/boletos';
 
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -93,6 +106,18 @@ class AppRouter {
             path: membersPath,
             pageBuilder: (context, state) => NoTransitionPage(
               child: MembersPage(service: membersService),
+            ),
+          ),
+          GoRoute(
+            path: addressesPath,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AddressesPage(service: addressesService),
+            ),
+          ),
+          GoRoute(
+            path: boletosPath,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: BoletosPage(service: boletosService),
             ),
           ),
         ],

@@ -61,5 +61,6 @@ class LayoutMenuItem {
     'category': Icons.category,
     'home': Icons.home,
     'group': Icons.group,
+    'location_on': Icons.location_on,
   };
 }

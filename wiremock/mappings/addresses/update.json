@@ -1,0 +1,8 @@
+{
+  "request": { "method": "PUT", "urlPathPattern": "/addresses/.*" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "id": "addr-1", "type": "Rua", "name": "Endereço Atualizado", "base_cep": "04578-000" }
+  }
+}

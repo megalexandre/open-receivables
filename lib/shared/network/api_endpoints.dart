@@ -1,6 +1,8 @@
 part 'endpoints/_auth.dart';
 part 'endpoints/_categories.dart';
 part 'endpoints/_members.dart';
+part 'endpoints/_addresses.dart';
+part 'endpoints/_boletos.dart';
 
 class ApiEndpoints {
   static const _base = String.fromEnvironment(
@@ -11,4 +13,6 @@ class ApiEndpoints {
   static const auth = _Auth();
   static const categories = _Categories();
   static const members = _Members();
+  static const addresses = _Addresses();
+  static const boletos = _Boletos();
 }

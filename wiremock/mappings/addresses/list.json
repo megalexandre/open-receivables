@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/addresses"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": "addr-1", "type": "Rua",     "name": "Avenida das Nações Unidas", "base_cep": "04578-000" },
+        { "id": "addr-2", "type": "Alameda", "name": "Alameda Santos",            "base_cep": "01419-001" },
+        { "id": "addr-3", "type": "Praça",   "name": "Praça da Sé",               "base_cep": "01001-000" },
+        { "id": "addr-4", "type": "Avenida", "name": "Avenida Paulista",          "base_cep": "01311-000" },
+        { "id": "addr-5", "type": "Rua",     "name": "Rua Augusta",               "base_cep": "01305-100" }
+      ],
+      "total": 1284,
+      "page": 1,
+      "pageSize": 5
+    }
+  }
+}

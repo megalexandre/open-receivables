@@ -7,6 +7,10 @@ import 'package:organizagrana/features/auth/data/auth_service.dart';
 import 'package:organizagrana/features/auth/data/auth_storage.dart';
 import 'package:organizagrana/features/categories/data/categories_api_client.dart';
 import 'package:organizagrana/features/categories/data/categories_service.dart';
+import 'package:organizagrana/features/addresses/data/addresses_api_client.dart';
+import 'package:organizagrana/features/addresses/data/addresses_service.dart';
+import 'package:organizagrana/features/boletos/data/boletos_api_client.dart';
+import 'package:organizagrana/features/boletos/data/boletos_service.dart';
 import 'package:organizagrana/features/members/data/members_api_client.dart';
 import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/shared/network/http_api_client.dart';
@@ -48,10 +52,20 @@ class AppDependencies {
       apiClient: HttpMembersApiClient(httpClient: featureHttpApiClient),
     );
 
+    final addressesService = AddressesService(
+      apiClient: HttpAddressesApiClient(httpClient: featureHttpApiClient),
+    );
+
+    final boletosService = BoletosService(
+      apiClient: HttpBoletosApiClient(httpClient: featureHttpApiClient),
+    );
+
     final router = AppRouter(
       session,
       categoriesService: categoriesService,
       membersService: membersService,
+      addressesService: addressesService,
+      boletosService: boletosService,
     );
 
     return AppDependencies._(session: session, router: router);
