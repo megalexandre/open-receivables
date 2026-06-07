@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/water-quality"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": "wq-1", "reference": "03/2026", "parameter": "Cor Aparente",      "required": 1, "analyzed": 1, "conformity": 1.0, "compliant": true  },
+        { "id": "wq-2", "reference": "03/2026", "parameter": "Turbidez",          "required": 1, "analyzed": 1, "conformity": 1.0, "compliant": true  },
+        { "id": "wq-3", "reference": "03/2026", "parameter": "Cloro Residual",    "required": 1, "analyzed": 1, "conformity": 1.0, "compliant": true  },
+        { "id": "wq-4", "reference": "03/2026", "parameter": "Escherichia Coli",  "required": 1, "analyzed": 0, "conformity": 0.0, "compliant": false },
+        { "id": "wq-5", "reference": "03/2026", "parameter": "Coliformes Totais", "required": 1, "analyzed": 1, "conformity": 1.0, "compliant": true  },
+        { "id": "wq-6", "reference": "02/2026", "parameter": "Turbidez",          "required": 6, "analyzed": 6, "conformity": 6.0, "compliant": true  },
+        { "id": "wq-7", "reference": "02/2026", "parameter": "Coliformes Totais", "required": 6, "analyzed": 6, "conformity": 6.0, "compliant": true  }
+      ],
+      "total": 124,
+      "page": 1,
+      "pageSize": 10
+    }
+  }
+}

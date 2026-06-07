@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/invoice-candidates"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": "ic-1", "member_name": "Jose Roberto dos Santos Silva",  "address": "06 LPHF, Avenida Mário...", "category": "TEMPORÁRIO SÓCIO", "valor_total": 30.00, "hdr_inicial": 1042.0 },
+        { "id": "ic-2", "member_name": "Evandro Oliveira Silva",          "address": "115-LPHF, Avenida Mário...", "category": "TEMPORÁRIO SÓCIO", "valor_total": 30.00, "hdr_inicial": 892.4  },
+        { "id": "ic-3", "member_name": "Gilvania Alves de Miranda",       "address": "116 LPHF, Avenida Mário...", "category": "TEMPORÁRIO SÓCIO", "valor_total": 30.00, "hdr_inicial": 2133.1 },
+        { "id": "ic-4", "member_name": "Emelli Sawane Maia Silva",        "address": "118 LPHF, Avenida Mário...", "category": "TEMPORÁRIO SÓCIO", "valor_total": 30.00, "hdr_inicial": 445.8  },
+        { "id": "ic-5", "member_name": "Robenilton Santos de Jesus",      "address": "124-LPHF, Avenida Mário...", "category": "TEMPORÁRIO SÓCIO", "valor_total": 30.00, "hdr_inicial": 1120.0 },
+        { "id": "ic-6", "member_name": "Maria das Graças Ferreira",       "address": "128 LPHF, Avenida Mário...", "category": "EFETIVO SÓCIO",    "valor_total": 45.00, "hdr_inicial": 3201.5 },
+        { "id": "ic-7", "member_name": "Antônio Carlos Pereira",          "address": "132 LPHF, Avenida Mário...", "category": "EFETIVO SÓCIO",    "valor_total": 45.00, "hdr_inicial": 780.3  },
+        { "id": "ic-8", "member_name": "Francisca Lima de Sousa",         "address": "140 LPHF, Avenida Mário...", "category": "TEMPORÁRIO SÓCIO", "valor_total": 30.00, "hdr_inicial": 567.9  }
+      ],
+      "total": 1862,
+      "total_value": 58443.60
+    }
+  }
+}

@@ -1,0 +1,205 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:organizagrana/shared/layout/side_menu/layout_menu_item.dart';
+
+const double _sidebarMaxWidth = 280;
+
+/// Sidebar de navegacao - versao desktop (coluna fixa lateral).
+class LayoutSideMenu extends StatelessWidget {
+  const LayoutSideMenu({
+    super.key,
+    required this.items,
+    required this.selectedIndex,
+    required this.onSelect,
+    this.backgroundColor,
+  });
+
+  final List<LayoutMenuItem> items;
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
+    final shadowColor = Theme.of(context).colorScheme.shadow;
+
+    return SizedBox(
+      width: _sidebarMaxWidth,
+      child: Material(
+        elevation: 4,
+        color: color,
+        shadowColor: shadowColor,
+        surfaceTintColor: Colors.transparent,
+        child: _SideMenuContent(
+          items: items,
+          selectedIndex: selectedIndex,
+          onSelect: onSelect,
+        ),
+      ),
+    );
+  }
+}
+
+/// Gaveta de navegacao - versao mobile.
+class LayoutDrawer extends StatelessWidget {
+  const LayoutDrawer({
+    super.key,
+    required this.items,
+    required this.selectedIndex,
+    required this.onSelect,
+    this.backgroundColor,
+  });
+
+  final List<LayoutMenuItem> items;
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedBackgroundColor =
+        backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
+
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final drawerWidth = min(screenWidth * 0.7, _sidebarMaxWidth);
+
+    return Drawer(
+      width: drawerWidth,
+      backgroundColor: resolvedBackgroundColor,
+      shape: const RoundedRectangleBorder(),
+      child: SafeArea(
+        child: _SideMenuContent(
+          items: items,
+          selectedIndex: selectedIndex,
+          onSelect: (i) {
+            onSelect(i);
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SideMenuContent extends StatelessWidget {
+  const _SideMenuContent({
+    required this.items,
+    required this.selectedIndex,
+    required this.onSelect,
+  });
+
+  final List<LayoutMenuItem> items;
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: items.length,
+      itemBuilder: (context, i) {
+        final item = items[i];
+
+        if (item.isHeader) {
+          return _SectionHeader(label: item.label);
+        }
+
+        return _MenuItem(
+          icon: item.icon!,
+          label: item.label,
+          selected: selectedIndex == i,
+          hasChildren: item.hasChildren,
+          indent: item.indent,
+          onTap: () => onSelect(i),
+        );
+      },
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.hasChildren,
+    required this.indent,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final bool hasChildren;
+  final bool indent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final foreground = selected ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.75);
+    final bgColor = selected ? colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent;
+
+    return Material(
+        color: bgColor,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(indent ? 24 : 10, 10, 10, 10),
+            child: Row(
+              children: [
+                Icon(icon, size: indent ? 16 : 18, color: foreground),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: foreground,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (hasChildren) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 16,
+                    color: colorScheme.onSurface.withValues(alpha: 0.35),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+    );
+  }
+}
