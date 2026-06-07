@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/shared/widgets/data_display/app_pagination.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 class AppTableColumn<T> {
   const AppTableColumn({
@@ -59,7 +60,7 @@ class AppTable<T> extends StatelessWidget {
               ? const Center(child: CircularProgressIndicator())
               : LayoutBuilder(
                   builder: (context, constraints) => constraints.maxWidth >= breakpoint
-                      ? _buildTable(context, constraints)
+                      ? _buildTable(context)
                       : _buildCards(context),
                 ),
         ),
@@ -74,45 +75,73 @@ class AppTable<T> extends StatelessWidget {
     );
   }
 
-  Widget _buildTable(BuildContext context, BoxConstraints constraints) {
-    final cs = Theme.of(context).colorScheme;
-    final sortIndex = sortKey == null
-        ? null
-        : columns.indexWhere((c) => c.sortKey == sortKey);
+  String _fieldFor(AppTableColumn<T> col) => col.sortKey ?? col.label;
 
-    return SingleChildScrollView(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: constraints.maxWidth),
-          child: DataTable(
-            showCheckboxColumn: false,
-            sortColumnIndex: (sortIndex != null && sortIndex >= 0) ? sortIndex : null,
-            sortAscending: sortAscending,
-            headingRowColor: WidgetStateProperty.all(cs.surfaceContainerHighest),
-            border: bordered ? TableBorder.all(color: cs.outlineVariant) : null,
-            columns: columns.map((c) {
-              return DataColumn(
-                label: Text(c.label),
-                numeric: c.numeric,
-                onSort: c.sortKey != null && onSort != null
-                    ? (_, ascending) => onSort!(c.sortKey!, ascending)
-                    : null,
-              );
-            }).toList(),
-            rows: items.indexed.map((entry) {
-              final (index, item) = entry;
-              return DataRow(
-                onSelectChanged: (_) {},
-                color: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.hovered)) return cs.surfaceContainerLow;
-                  if (striped) return index.isOdd ? cs.surfaceContainerLowest : cs.surface;
-                  return Colors.transparent;
-                }),
-                cells: columns.map((c) => DataCell(c.builder(item))).toList(),
-              );
-            }).toList(),
-          ),
+  Widget _buildTable(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final plutoColumns = <PlutoColumn>[
+      // coluna oculta para carregar o índice do item
+      PlutoColumn(
+        title: '',
+        field: '__idx',
+        type: PlutoColumnType.number(),
+        hide: true,
+        enableSorting: false,
+        enableColumnDrag: false,
+        enableContextMenu: false,
+        enableDropToResize: false,
+      ),
+      ...columns.map((col) => PlutoColumn(
+            title: col.label,
+            field: _fieldFor(col),
+            type: PlutoColumnType.text(),
+            textAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
+            titleTextAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
+            enableSorting: col.sortKey != null && onSort != null,
+            enableColumnDrag: false,
+            enableContextMenu: false,
+            renderer: (rendererContext) {
+              final idx = rendererContext.row.cells['__idx']!.value as int;
+              return col.builder(items[idx]);
+            },
+          )),
+    ];
+
+    final plutoRows = items.indexed.map((entry) {
+      final (i, _) = entry;
+      return PlutoRow(cells: {
+        '__idx': PlutoCell(value: i),
+        for (final col in columns) _fieldFor(col): PlutoCell(value: ''),
+      });
+    }).toList();
+
+    return PlutoGrid(
+      columns: plutoColumns,
+      rows: plutoRows,
+      onSorted: onSort != null
+          ? (PlutoGridOnSortedEvent event) {
+              if (event.column.field == '__idx') return;
+              final key = event.column.field;
+              final ascending = event.column.sort == PlutoColumnSort.ascending;
+              onSort!(key, ascending);
+            }
+          : null,
+      configuration: PlutoGridConfiguration(
+        style: PlutoGridStyleConfig(
+          gridBorderColor: bordered ? cs.outlineVariant : Colors.transparent,
+          borderColor: cs.outlineVariant,
+          activatedBorderColor: cs.primary,
+          columnTextStyle: textTheme.labelMedium ?? const TextStyle(),
+          cellTextStyle: textTheme.bodySmall ?? const TextStyle(),
+          columnHeight: 40,
+          rowHeight: 40,
+          oddRowColor: striped ? cs.surfaceContainerLowest : null,
+          evenRowColor: striped ? cs.surface : null,
+          activatedColor: cs.primaryContainer.withValues(alpha: 0.3),
+          gridBackgroundColor: cs.surface,
+          rowColor: cs.surface,
         ),
       ),
     );
