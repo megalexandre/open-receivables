@@ -18,7 +18,7 @@ class AppTableColumn<T> {
   final bool showInCard;
 }
 
-class AppTable<T> extends StatelessWidget {
+class AppTable<T> extends StatefulWidget {
   const AppTable({
     super.key,
     required this.columns,
@@ -34,6 +34,8 @@ class AppTable<T> extends StatelessWidget {
     this.bordered = false,
     this.striped = false,
     this.breakpoint = 700,
+    this.onLoadMore,
+    this.hasMore = false,
   });
 
   final List<AppTableColumn<T>> columns;
@@ -50,27 +52,112 @@ class AppTable<T> extends StatelessWidget {
   final bool striped;
   final double breakpoint;
 
+  /// Quando fornecido, ativa o modo infinite scroll (oculta a paginação).
+  final VoidCallback? onLoadMore;
+
+  /// Indica se ainda há mais registros para carregar.
+  final bool hasMore;
+
+  @override
+  State<AppTable<T>> createState() => _AppTableState<T>();
+}
+
+class _AppTableState<T> extends State<AppTable<T>> {
+  PlutoGridStateManager? _stateManager;
+
+  void _onLoaded(PlutoGridOnLoadedEvent event) {
+    _stateManager = event.stateManager;
+    if (widget.onLoadMore != null) {
+      _stateManager!.scroll.bodyRowsVertical?.addListener(_onScroll);
+    }
+  }
+
+  void _onScroll() {
+    final pos = _stateManager?.scroll.bodyRowsVertical?.position;
+    if (pos == null) return;
+    if (!widget.hasMore || widget.loading) return;
+    if (pos.pixels >= pos.maxScrollExtent - 120) {
+      widget.onLoadMore!();
+    }
+  }
+
+  List<PlutoRow> _buildPlutoRows() {
+    return widget.items.indexed.map((entry) {
+      final (i, _) = entry;
+      return PlutoRow(cells: {
+        '__idx': PlutoCell(value: i),
+        for (final col in widget.columns) _fieldFor(col): PlutoCell(value: ''),
+      });
+    }).toList();
+  }
+
+  @override
+  void didUpdateWidget(AppTable<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // atualiza linhas imperativamente para não recriar o PlutoGrid inteiro
+    if (!identical(oldWidget.items, widget.items)) {
+      final sm = _stateManager;
+      if (sm != null) {
+        sm.removeAllRows();
+        if (widget.items.isNotEmpty) {
+          sm.appendRows(_buildPlutoRows());
+        }
+      }
+    }
+
+    if (oldWidget.onLoadMore == null && widget.onLoadMore != null) {
+      _stateManager?.scroll.bodyRowsVertical?.addListener(_onScroll);
+    } else if (oldWidget.onLoadMore != null && widget.onLoadMore == null) {
+      _stateManager?.scroll.bodyRowsVertical?.removeListener(_onScroll);
+    }
+  }
+
+  @override
+  void dispose() {
+    _stateManager?.scroll.bodyRowsVertical?.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  bool get _infiniteMode => widget.onLoadMore != null;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: loading
+          child: widget.loading && widget.items.isEmpty && _stateManager == null
               ? const Center(child: CircularProgressIndicator())
-              : LayoutBuilder(
-                  builder: (context, constraints) => constraints.maxWidth >= breakpoint
-                      ? _buildTable(context)
-                      : _buildCards(context),
+              : Stack(
+                  children: [
+                    LayoutBuilder(
+                      builder: (context, constraints) => constraints.maxWidth >= widget.breakpoint
+                          ? _buildTable(context)
+                          : _buildCards(context),
+                    ),
+                    if (widget.loading && widget.items.isEmpty)
+                      const ColoredBox(
+                        color: Colors.black12,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                  ],
                 ),
         ),
-        const SizedBox(height: 12),
-        AppPagination(
-          total: total,
-          page: page,
-          pageSize: pageSize,
-          onPageChanged: onPageChanged,
-        ),
+        if (!_infiniteMode) ...[
+          const SizedBox(height: 12),
+          AppPagination(
+            total: widget.total,
+            page: widget.page,
+            pageSize: widget.pageSize,
+            onPageChanged: widget.onPageChanged,
+          ),
+        ],
+        if (_infiniteMode && widget.loading && widget.items.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(child: CircularProgressIndicator()),
+          ),
       ],
     );
   }
@@ -82,7 +169,6 @@ class AppTable<T> extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final plutoColumns = <PlutoColumn>[
-      // coluna oculta para carregar o índice do item
       PlutoColumn(
         title: '',
         field: '__idx',
@@ -93,52 +179,63 @@ class AppTable<T> extends StatelessWidget {
         enableContextMenu: false,
         enableDropToResize: false,
       ),
-      ...columns.map((col) => PlutoColumn(
-            title: col.label,
-            field: _fieldFor(col),
-            type: PlutoColumnType.text(),
-            textAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
-            titleTextAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
-            enableSorting: col.sortKey != null && onSort != null,
-            enableColumnDrag: false,
-            enableContextMenu: false,
-            renderer: (rendererContext) {
-              final idx = rendererContext.row.cells['__idx']!.value as int;
-              return col.builder(items[idx]);
-            },
-          )),
+      ...widget.columns.map((col) {
+        final isActions = !col.showInCard;
+        return PlutoColumn(
+          title: col.label,
+          field: _fieldFor(col),
+          type: PlutoColumnType.text(),
+          textAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
+          titleTextAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
+          enableSorting: col.sortKey != null && widget.onSort != null,
+          enableColumnDrag: false,
+          enableContextMenu: false,
+          enableDropToResize: !isActions,
+          width: isActions ? 96 : 150,
+          minWidth: isActions ? 96 : 80,
+          suppressedAutoSize: isActions,
+          renderer: (rendererContext) {
+            final idx = rendererContext.row.cells['__idx']!.value as int;
+            return DefaultTextStyle.merge(
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              child: Align(
+                alignment: col.numeric ? Alignment.centerRight : Alignment.centerLeft,
+                child: col.builder(widget.items[idx]),
+              ),
+            );
+          },
+        );
+      }),
     ];
-
-    final plutoRows = items.indexed.map((entry) {
-      final (i, _) = entry;
-      return PlutoRow(cells: {
-        '__idx': PlutoCell(value: i),
-        for (final col in columns) _fieldFor(col): PlutoCell(value: ''),
-      });
-    }).toList();
 
     return PlutoGrid(
       columns: plutoColumns,
-      rows: plutoRows,
-      onSorted: onSort != null
+      rows: _buildPlutoRows(),
+      mode: PlutoGridMode.readOnly,
+      onLoaded: _onLoaded,
+      onSorted: widget.onSort != null
           ? (PlutoGridOnSortedEvent event) {
               if (event.column.field == '__idx') return;
               final key = event.column.field;
               final ascending = event.column.sort == PlutoColumnSort.ascending;
-              onSort!(key, ascending);
+              widget.onSort!(key, ascending);
             }
           : null,
       configuration: PlutoGridConfiguration(
+        columnSize: const PlutoGridColumnSizeConfig(
+          autoSizeMode: PlutoAutoSizeMode.scale,
+        ),
         style: PlutoGridStyleConfig(
-          gridBorderColor: bordered ? cs.outlineVariant : Colors.transparent,
+          gridBorderColor: widget.bordered ? cs.outlineVariant : Colors.transparent,
           borderColor: cs.outlineVariant,
           activatedBorderColor: cs.primary,
           columnTextStyle: textTheme.labelMedium ?? const TextStyle(),
           cellTextStyle: textTheme.bodySmall ?? const TextStyle(),
           columnHeight: 40,
           rowHeight: 40,
-          oddRowColor: striped ? cs.surfaceContainerLowest : null,
-          evenRowColor: striped ? cs.surface : null,
+          oddRowColor: widget.striped ? cs.surfaceContainerLowest : cs.surface,
+          evenRowColor: cs.surface,
           activatedColor: cs.primaryContainer.withValues(alpha: 0.3),
           gridBackgroundColor: cs.surface,
           rowColor: cs.surface,
@@ -149,11 +246,11 @@ class AppTable<T> extends StatelessWidget {
 
   Widget _buildCards(BuildContext context) {
     final theme = Theme.of(context);
-    final cardCols = columns.where((c) => c.showInCard).toList();
+    final cardCols = widget.columns.where((c) => c.showInCard).toList();
     return ListView.builder(
-      itemCount: items.length,
+      itemCount: widget.items.length,
       itemBuilder: (context, index) {
-        final item = items[index];
+        final item = widget.items[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: Padding(

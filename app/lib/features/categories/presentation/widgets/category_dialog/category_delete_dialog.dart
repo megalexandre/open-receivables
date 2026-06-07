@@ -8,22 +8,22 @@ Future<bool> showCategoryDeleteDialog(
 ) async {
   final confirmed = await showAppDialog<bool>(
     context: context,
-    builder: (_) => AppDialog(
+    builder: (dialogContext) => AppDialog(
       title: 'Excluir Categoria',
       content: Text(
         'Tem certeza que deseja excluir a categoria "${category.subCategoryName}/${category.name}"?',
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(dialogContext).pop(false),
           child: const Text('Cancelar'),
         ),
         FilledButton.icon(
           style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            foregroundColor: Theme.of(context).colorScheme.onError,
+            backgroundColor: Theme.of(dialogContext).colorScheme.error,
+            foregroundColor: Theme.of(dialogContext).colorScheme.onError,
           ),
-          onPressed: () => Navigator.of(context).pop(true),
+          onPressed: () => Navigator.of(dialogContext).pop(true),
           icon: const Icon(Icons.delete_outline, size: 16),
           label: const Text('Excluir'),
         ),

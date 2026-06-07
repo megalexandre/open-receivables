@@ -19,19 +19,21 @@ class _CategoriesPageState extends State<CategoriesPage> {
   List<Category> _categories = [];
   int _total = 0;
   int _page = 1;
-  static const int _pageSize = 10;
+  static const int _pageSize = 20;
   String? _sortBy;
   bool _sortAscending = true;
-  bool _loading = true;
+  bool _loading = false;
+  bool _hasMore = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _loadMore();
   }
 
-  Future<void> _load() async {
+  Future<void> _loadMore() async {
+    if (_loading) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -45,8 +47,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
       );
       if (mounted) {
         setState(() {
-          _categories = result.categories;
+          _categories = [..._categories, ...result.categories];
           _total = result.total;
+          _hasMore = _categories.length < _total;
+          _page++;
           _loading = false;
         });
       }
@@ -60,18 +64,25 @@ class _CategoriesPageState extends State<CategoriesPage> {
     }
   }
 
-  void _onPageChanged(int page) {
-    setState(() => _page = page);
-    _load();
+  void _reset() {
+    _categories = [];
+    _page = 1;
+    _hasMore = false;
+    _loading = false;
+  }
+
+  void _refresh() {
+    setState(_reset);
+    _loadMore();
   }
 
   void _onSort(String key, bool ascending) {
     setState(() {
       _sortBy = key;
       _sortAscending = ascending;
-      _page = 1;
+      _reset();
     });
-    _load();
+    _loadMore();
   }
 
   Future<void> _openForm([Category? category]) async {
@@ -82,16 +93,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
           ? (result) => widget.service.create(result)
           : (result) => widget.service.update(result),
     );
-    if (saved) _load();
+    if (saved) _refresh();
   }
 
   Future<void> _confirmDelete(Category category) async {
     final confirmed = await showCategoryDeleteDialog(context, category);
     if (!confirmed) return;
-    
+
     try {
       await widget.service.delete(category.id);
-      _load();
+      _refresh();
     } on CategoryFailure catch (e) {
       if (mounted) _showError(e.message);
     }
@@ -147,16 +158,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 padding: const EdgeInsets.all(16),
                 child: CategoriesTable(
                   categories: _categories,
-                  total: _total,
-                  page: _page,
-                  pageSize: _pageSize,
-                  onPageChanged: _onPageChanged,
                   onSort: _onSort,
                   sortKey: _sortBy,
                   sortAscending: _sortAscending,
                   onEdit: _openForm,
                   onDelete: _confirmDelete,
                   loading: _loading,
+                  onLoadMore: _loadMore,
+                  hasMore: _hasMore,
                 ),
               ),
             ),
