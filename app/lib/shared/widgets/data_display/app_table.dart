@@ -69,6 +69,7 @@ class _AppTableState<T> extends State<AppTable<T>> {
     _stateManager = event.stateManager;
     if (widget.onLoadMore != null) {
       _stateManager!.scroll.bodyRowsVertical?.addListener(_onScroll);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _checkNeedMore());
     }
   }
 
@@ -79,6 +80,13 @@ class _AppTableState<T> extends State<AppTable<T>> {
     if (pos.pixels >= pos.maxScrollExtent - 120) {
       widget.onLoadMore!();
     }
+  }
+
+  void _checkNeedMore() {
+    if (!widget.hasMore || widget.loading) return;
+    final pos = _stateManager?.scroll.bodyRowsVertical?.position;
+    if (pos == null || pos.maxScrollExtent > 120) return;
+    widget.onLoadMore!();
   }
 
   List<PlutoRow> _buildPlutoRows() {
@@ -103,6 +111,9 @@ class _AppTableState<T> extends State<AppTable<T>> {
         if (widget.items.isNotEmpty) {
           sm.appendRows(_buildPlutoRows());
         }
+      }
+      if (widget.onLoadMore != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _checkNeedMore());
       }
     }
 
@@ -188,6 +199,7 @@ class _AppTableState<T> extends State<AppTable<T>> {
           textAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
           titleTextAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
           enableSorting: col.sortKey != null && widget.onSort != null,
+          enableFilterMenuItem: false,
           enableColumnDrag: false,
           enableContextMenu: false,
           enableDropToResize: !isActions,

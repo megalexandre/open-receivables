@@ -18,24 +18,27 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
   List<WaterAnalysis> _analyses = [];
   int _total = 0;
   int _page = 1;
-  static const int _pageSize = 10;
+  static const int _pageSize = 20;
   String? _sortBy;
   bool _sortAscending = true;
-  bool _loading = true;
+  bool _loading = false;
+  bool _hasMore = false;
   String? _error;
 
-  DateTime _filterDate = DateTime(DateTime.now().year, DateTime.now().month);
+  DateTime? _filterDate;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _loadMore();
   }
 
-  String get _reference =>
-      '${_filterDate.month.toString().padLeft(2, '0')}/${_filterDate.year}';
+  String? get _reference => _filterDate == null
+      ? null
+      : '${_filterDate!.month.toString().padLeft(2, '0')}/${_filterDate!.year}';
 
-  Future<void> _load() async {
+  Future<void> _loadMore() async {
+    if (_loading) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -43,14 +46,17 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
     try {
       final result = await widget.service.list(
         page: _page,
+        pageSize: _pageSize,
         sortBy: _sortBy,
         sortAscending: _sortAscending,
         reference: _reference,
       );
       if (mounted) {
         setState(() {
-          _analyses = result.analyses;
+          _analyses = [..._analyses, ...result.analyses];
           _total = result.total;
+          _hasMore = _analyses.length < _total;
+          _page++;
           _loading = false;
         });
       }
@@ -61,21 +67,67 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
           _loading = false;
         });
       }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
     }
   }
 
-  void _onPageChanged(int page) {
-    setState(() => _page = page);
-    _load();
+  void _reset() {
+    _analyses = [];
+    _page = 1;
+    _hasMore = false;
+    _loading = false;
+  }
+
+  void _refresh() {
+    setState(_reset);
+    _loadMore();
   }
 
   void _onSort(String key, bool ascending) {
     setState(() {
       _sortBy = key;
       _sortAscending = ascending;
-      _page = 1;
+      _reset();
     });
-    _load();
+    _loadMore();
+  }
+
+  Future<void> _deleteReference(String reference) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir referência'),
+        content: Text(
+          'Todos os registros de $reference serão excluídos permanentemente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await widget.service.delete(reference);
+      _refresh();
+    } on WaterQualityFailure catch (e) {
+      if (mounted) _showError(e.message);
+    }
   }
 
   Future<void> _openForm() async {
@@ -83,7 +135,7 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
     if (batch == null) return;
     try {
       await widget.service.create(batch);
-      _load();
+      _refresh();
     } on WaterQualityFailure catch (e) {
       if (mounted) _showError(e.message);
     }
@@ -96,20 +148,24 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
   }
 
   Future<void> _pickPeriod() async {
-    final picked = await showDatePicker(
+    final picked = await showDialog<DateTime>(
       context: context,
-      initialDate: _filterDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      initialDatePickerMode: DatePickerMode.year,
-      helpText: 'Filtrar por período',
+      builder: (_) => _MonthYearPickerDialog(initial: _filterDate),
     );
     if (picked == null) return;
     setState(() {
-      _filterDate = DateTime(picked.year, picked.month);
-      _page = 1;
+      _filterDate = picked;
+      _reset();
     });
-    _load();
+    _loadMore();
+  }
+
+  void _clearPeriod() {
+    setState(() {
+      _filterDate = null;
+      _reset();
+    });
+    _loadMore();
   }
 
   @override
@@ -147,7 +203,7 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
           _PeriodFilter(
             date: _filterDate,
             onPickPeriod: _pickPeriod,
-            onConsult: _load,
+            onClearPeriod: _filterDate != null ? _clearPeriod : null,
           ),
           const SizedBox(height: 16),
           if (_error != null)
@@ -161,14 +217,13 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
                 padding: const EdgeInsets.all(16),
                 child: WaterQualityTable(
                   analyses: _analyses,
-                  total: _total,
-                  page: _page,
-                  pageSize: _pageSize,
-                  onPageChanged: _onPageChanged,
                   onSort: _onSort,
                   sortKey: _sortBy,
                   sortAscending: _sortAscending,
                   loading: _loading,
+                  onLoadMore: _loadMore,
+                  hasMore: _hasMore,
+                  onDelete: _deleteReference,
                 ),
               ),
             ),
@@ -179,23 +234,123 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
   }
 }
 
+class _MonthYearPickerDialog extends StatefulWidget {
+  const _MonthYearPickerDialog({this.initial});
+  final DateTime? initial;
+
+  @override
+  State<_MonthYearPickerDialog> createState() => _MonthYearPickerDialogState();
+}
+
+class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
+  late int _year;
+  final int _minYear = 2019;
+  final int _maxYear = DateTime.now().year;
+
+  static const _months = [
+    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _year = widget.initial?.year ?? DateTime.now().year;
+  }
+
+  bool _isAvailable(int month) {
+    final now = DateTime.now();
+    return DateTime(_year, month).isBefore(DateTime(now.year, now.month + 1));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final selected = widget.initial;
+    return AlertDialog(
+      title: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: _year > _minYear ? () => setState(() => _year--) : null,
+          ),
+          Expanded(
+            child: Text(
+              '$_year',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: _year < _maxYear ? () => setState(() => _year++) : null,
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 280,
+        child: GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            childAspectRatio: 1.4,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: 12,
+          itemBuilder: (_, i) {
+            final month = i + 1;
+            final isSelected = selected?.year == _year && selected?.month == month;
+            final available = _isAvailable(month);
+            return TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: isSelected ? cs.primary : null,
+                foregroundColor: isSelected
+                    ? cs.onPrimary
+                    : available
+                        ? null
+                        : cs.onSurface.withValues(alpha: 0.3),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: available
+                  ? () => Navigator.of(context).pop(DateTime(_year, month))
+                  : null,
+              child: Text(_months[i]),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+      ],
+    );
+  }
+}
+
 class _PeriodFilter extends StatelessWidget {
   const _PeriodFilter({
     required this.date,
     required this.onPickPeriod,
-    required this.onConsult,
+    this.onClearPeriod,
   });
 
-  final DateTime date;
+  final DateTime? date;
   final VoidCallback onPickPeriod;
-  final VoidCallback onConsult;
+  final VoidCallback? onClearPeriod;
 
   static const _months = [
     'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
     'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
   ];
 
-  String get _label => '${_months[date.month - 1]} de ${date.year}';
+  String get _label => date == null
+      ? 'Todos os períodos'
+      : '${_months[date!.month - 1]} de ${date!.year}';
 
   @override
   Widget build(BuildContext context) {
@@ -209,11 +364,14 @@ class _PeriodFilter extends StatelessWidget {
           icon: const Icon(Icons.calendar_today_outlined, size: 16),
           label: Text(_label),
         ),
-        const SizedBox(width: 8),
-        FilledButton.tonal(
-          onPressed: onConsult,
-          child: const Text('Consultar'),
-        ),
+        if (onClearPeriod != null) ...[
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.close, size: 16),
+            tooltip: 'Limpar filtro',
+            onPressed: onClearPeriod,
+          ),
+        ],
       ],
     );
   }

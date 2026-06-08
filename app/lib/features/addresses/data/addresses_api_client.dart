@@ -9,6 +9,8 @@ abstract class AddressesApiClient {
     int pageSize = 5,
     String? sortBy,
     bool sortAscending = true,
+    String? addressType,
+    String? name,
   });
   Future<Map<String, dynamic>> create(Address address);
   Future<Map<String, dynamic>> update(Address address);
@@ -26,9 +28,19 @@ class HttpAddressesApiClient extends BaseHttpResourceClient
     int pageSize = 5,
     String? sortBy,
     bool sortAscending = true,
+    String? addressType,
+    String? name,
   }) {
-    final uri = Uri.parse(ApiEndpoints.addresses.list)
-        .replace(queryParameters: listParams(page, pageSize, sortBy, sortAscending));
+    final uri = Uri.parse(ApiEndpoints.addresses.list).replace(
+      queryParameters: {
+        'page': '$page',
+        'limit': '$pageSize',
+        if (sortBy != null) 'sort_by': sortBy,
+        if (sortBy != null) 'sort_order': sortAscending ? 'asc' : 'desc',
+        if (addressType != null) 'address_type': addressType,
+        if (name != null && name.isNotEmpty) 'name': name,
+      },
+    );
     return call(() => httpClient.getJson(uri));
   }
 

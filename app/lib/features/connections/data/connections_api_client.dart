@@ -1,3 +1,4 @@
+import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/shared/network/api_endpoints.dart';
 import 'package:organizagrana/shared/network/base_http_resource_client.dart';
 import 'package:organizagrana/shared/network/http_api_client.dart';
@@ -13,6 +14,8 @@ abstract class ConnectionsApiClient {
     bool? active,
   });
   Future<Map<String, dynamic>> summary();
+  Future<Map<String, dynamic>> create(Connection connection);
+  Future<Map<String, dynamic>> update(Connection connection);
   Future<void> delete(String id);
 }
 
@@ -36,7 +39,7 @@ class HttpConnectionsApiClient extends BaseHttpResourceClient
         ...listParams(page, pageSize, sortBy, sortAscending),
         if (memberName != null && memberName.isNotEmpty)
           'memberName': memberName,
-        if (address != null && address.isNotEmpty) 'address': address,
+        if (address != null && address.isNotEmpty) 'addressId': address,
         if (active != null) 'active': '$active',
       },
     );
@@ -46,6 +49,22 @@ class HttpConnectionsApiClient extends BaseHttpResourceClient
   @override
   Future<Map<String, dynamic>> summary() => call(
         () => httpClient.getJson(Uri.parse(ApiEndpoints.connections.summary)),
+      );
+
+  @override
+  Future<Map<String, dynamic>> create(Connection connection) => call(
+        () => httpClient.postJson(
+          Uri.parse(ApiEndpoints.connections.create),
+          {'connection': connection.toJson()},
+        ),
+      );
+
+  @override
+  Future<Map<String, dynamic>> update(Connection connection) => call(
+        () => httpClient.putJson(
+          Uri.parse(ApiEndpoints.connections.byId(connection.id)),
+          {'connection': connection.toJson()},
+        ),
       );
 
   @override

@@ -20,25 +20,22 @@ class AddressFormDialog extends StatefulWidget {
 class _AddressFormDialogState extends State<AddressFormDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  late String _type;
+  late String _addressType;
   late final TextEditingController _nameCtrl;
-  late final TextEditingController _baseCepCtrl;
   late final TextEditingController _notesCtrl;
 
   @override
   void initState() {
     super.initState();
     final a = widget.address;
-    _type = a?.type ?? 'Rua';
+    _addressType = a?.addressType ?? 'Rua';
     _nameCtrl = TextEditingController(text: a?.name ?? '');
-    _baseCepCtrl = TextEditingController(text: a?.baseCep ?? '');
     _notesCtrl = TextEditingController(text: a?.notes ?? '');
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _baseCepCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -47,9 +44,8 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
     if (!_formKey.currentState!.validate()) return;
     Navigator.of(context).pop(Address(
       id: widget.address?.id ?? '',
-      type: _type,
+      addressType: _addressType,
       name: _nameCtrl.text.trim(),
-      baseCep: _baseCepCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
     ));
   }
@@ -74,14 +70,14 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                     children: [
                       const _Label('Tipo'),
                       DropdownButtonFormField<String>(
-                        initialValue: _type,
+                        initialValue: _addressType,
                         items: const [
                           DropdownMenuItem(value: 'Rua', child: Text('Rua')),
                           DropdownMenuItem(value: 'Alameda', child: Text('Alameda')),
                           DropdownMenuItem(value: 'Praça', child: Text('Praça')),
                           DropdownMenuItem(value: 'Avenida', child: Text('Avenida')),
                         ],
-                        onChanged: (v) => setState(() => _type = v!),
+                        onChanged: (v) => setState(() => _addressType = v!),
                         decoration: const InputDecoration(isDense: true),
                       ),
                     ],
@@ -109,23 +105,12 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
               ],
             ),
             const SizedBox(height: 12),
-            const _Label('CEP Base'),
-            TextFormField(
-              controller: _baseCepCtrl,
-              decoration: const InputDecoration(
-                hintText: '00000-000',
-                isDense: true,
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Campo obrigatório' : null,
-            ),
-            const SizedBox(height: 12),
-            const _Label('Observações Institucionais'),
+            const _Label('Observações'),
             TextFormField(
               controller: _notesCtrl,
               maxLines: 3,
               decoration: const InputDecoration(
-                hintText: 'Opcional: Detalhes internos para identificação de cobrança',
+                hintText: 'Opcional',
                 isDense: true,
               ),
             ),

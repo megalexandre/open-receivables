@@ -12,6 +12,7 @@ abstract class WaterQualityApiClient {
     String? reference,
   });
   Future<Map<String, dynamic>> create(WaterAnalysisBatch batch);
+  Future<void> delete(String reference);
 }
 
 class HttpWaterQualityApiClient extends BaseHttpResourceClient
@@ -41,6 +42,15 @@ class HttpWaterQualityApiClient extends BaseHttpResourceClient
         () => httpClient.postJson(
           Uri.parse(ApiEndpoints.waterQuality.create),
           batch.toJson(),
+        ),
+      );
+
+  @override
+  Future<void> delete(String reference) => callVoid(
+        () => httpClient.deleteVoid(
+          Uri.parse(ApiEndpoints.waterQuality.delete).replace(
+            queryParameters: {'reference': reference},
+          ),
         ),
       );
 }

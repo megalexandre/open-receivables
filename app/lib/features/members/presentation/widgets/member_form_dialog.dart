@@ -48,7 +48,6 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
       name: _nameCtrl.text.trim(),
       document: _documentCtrl.text.trim(),
       memberNumber: _memberNumberCtrl.text.trim(),
-      active: widget.member?.active ?? true,
     ));
   }
 

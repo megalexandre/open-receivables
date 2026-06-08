@@ -12,7 +12,7 @@ class ConnectionsTable extends StatelessWidget {
     required this.page,
     required this.pageSize,
     required this.onPageChanged,
-    required this.onView,
+    required this.onEdit,
     required this.onDelete,
     this.onSort,
     this.sortKey,
@@ -25,7 +25,7 @@ class ConnectionsTable extends StatelessWidget {
   final int page;
   final int pageSize;
   final void Function(int page) onPageChanged;
-  final void Function(Connection) onView;
+  final void Function(Connection) onEdit;
   final void Function(Connection) onDelete;
   final void Function(String key, bool ascending)? onSort;
   final String? sortKey;
@@ -79,9 +79,9 @@ class ConnectionsTable extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.visibility_outlined, size: 18),
-                tooltip: 'Visualizar',
-                onPressed: () => onView(c),
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                tooltip: 'Editar',
+                onPressed: () => onEdit(c),
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 18),

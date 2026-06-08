@@ -3,6 +3,9 @@ import 'package:organizagrana/features/addresses/domain/address.dart';
 import 'package:organizagrana/features/addresses/domain/address_failure.dart';
 import 'package:organizagrana/shared/errors/app_failure.dart';
 
+export 'package:organizagrana/shared/errors/app_failure.dart'
+    show ValidationFailure, ApiValidationError;
+
 class AddressesResult {
   const AddressesResult({
     required this.addresses,
@@ -28,6 +31,8 @@ class AddressesService {
     int pageSize = 5,
     String? sortBy,
     bool sortAscending = true,
+    String? addressType,
+    String? name,
   }) async {
     try {
       final json = await _apiClient.list(
@@ -35,13 +40,16 @@ class AddressesService {
         pageSize: pageSize,
         sortBy: sortBy,
         sortAscending: sortAscending,
+        addressType: addressType,
+        name: name,
       );
       final data = (json['data'] as List).cast<Map<String, dynamic>>();
+      final pagination = json['pagination'] as Map<String, dynamic>;
       return AddressesResult(
         addresses: data.map(Address.fromJson).toList(),
-        total: (json['total'] as num).toInt(),
-        page: (json['page'] as num).toInt(),
-        pageSize: (json['pageSize'] as num).toInt(),
+        total: (pagination['total_count'] as num).toInt(),
+        page: (pagination['current_page'] as num).toInt(),
+        pageSize: (pagination['per_page'] as num).toInt(),
       );
     } on AppFailure catch (e) {
       throw AddressFailure(e.type);
@@ -52,6 +60,8 @@ class AddressesService {
     try {
       final json = await _apiClient.create(address);
       return Address.fromJson(json);
+    } on ValidationFailure {
+      rethrow;
     } on AppFailure catch (e) {
       throw AddressFailure(e.type);
     }
@@ -61,6 +71,8 @@ class AddressesService {
     try {
       final json = await _apiClient.update(address);
       return Address.fromJson(json);
+    } on ValidationFailure {
+      rethrow;
     } on AppFailure catch (e) {
       throw AddressFailure(e.type);
     }

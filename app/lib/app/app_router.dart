@@ -146,6 +146,8 @@ class AppRouter {
               child: ConnectionsPage(
                 service: connectionsService,
                 addressesService: addressesService,
+                membersService: membersService,
+                categoriesService: categoriesService,
               ),
             ),
           ),

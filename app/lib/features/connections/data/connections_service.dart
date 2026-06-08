@@ -43,11 +43,12 @@ class ConnectionsService {
         active: active,
       );
       final data = (json['data'] as List).cast<Map<String, dynamic>>();
+      final pagination = json['pagination'] as Map<String, dynamic>;
       return ConnectionsResult(
         connections: data.map(Connection.fromJson).toList(),
-        total: (json['total'] as num).toInt(),
-        page: (json['page'] as num).toInt(),
-        pageSize: (json['pageSize'] as num).toInt(),
+        total: (pagination['total_count'] as num).toInt(),
+        page: (pagination['current_page'] as num).toInt(),
+        pageSize: (pagination['per_page'] as num).toInt(),
       );
     } on AppFailure catch (e) {
       throw ConnectionFailure(e.type);
@@ -58,6 +59,22 @@ class ConnectionsService {
     try {
       final json = await _apiClient.summary();
       return ConnectionSummary.fromJson(json);
+    } on AppFailure catch (e) {
+      throw ConnectionFailure(e.type);
+    }
+  }
+
+  Future<void> create(Connection connection) async {
+    try {
+      await _apiClient.create(connection);
+    } on AppFailure catch (e) {
+      throw ConnectionFailure(e.type);
+    }
+  }
+
+  Future<void> update(Connection connection) async {
+    try {
+      await _apiClient.update(connection);
     } on AppFailure catch (e) {
       throw ConnectionFailure(e.type);
     }

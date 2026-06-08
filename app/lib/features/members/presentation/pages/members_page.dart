@@ -3,6 +3,7 @@ import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
 import 'package:organizagrana/features/members/domain/member_failure.dart';
 import 'package:organizagrana/features/members/presentation/widgets/member_delete_dialog.dart';
+import 'package:organizagrana/features/members/presentation/widgets/member_filter_bar.dart';
 import 'package:organizagrana/features/members/presentation/widgets/member_form_dialog.dart';
 import 'package:organizagrana/features/members/presentation/widgets/members_table.dart';
 
@@ -19,19 +20,24 @@ class _MembersPageState extends State<MembersPage> {
   List<Member> _members = [];
   int _total = 0;
   int _page = 1;
-  static const int _pageSize = 5;
+
   String? _sortBy;
   bool _sortAscending = true;
-  bool _loading = true;
+  bool _loading = false;
+  bool _hasMore = false;
   String? _error;
+  String? _filterName;
+  String? _filterDocument;
+  bool? _filterActive;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _loadMore();
   }
 
-  Future<void> _load() async {
+  Future<void> _loadMore() async {
+    if (_loading) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -41,11 +47,16 @@ class _MembersPageState extends State<MembersPage> {
         page: _page,
         sortBy: _sortBy,
         sortAscending: _sortAscending,
+        name: _filterName,
+        document: _filterDocument,
+        active: _filterActive,
       );
       if (mounted) {
         setState(() {
-          _members = result.members;
+          _members = [..._members, ...result.members];
           _total = result.total;
+          _hasMore = _members.length < _total;
+          _page++;
           _loading = false;
         });
       }
@@ -59,18 +70,35 @@ class _MembersPageState extends State<MembersPage> {
     }
   }
 
-  void _onPageChanged(int page) {
-    setState(() => _page = page);
-    _load();
+  void _reset() {
+    _members = [];
+    _page = 1;
+    _hasMore = false;
+    _loading = false;
+  }
+
+  void _refresh() {
+    setState(_reset);
+    _loadMore();
   }
 
   void _onSort(String key, bool ascending) {
     setState(() {
       _sortBy = key;
       _sortAscending = ascending;
-      _page = 1;
+      _reset();
     });
-    _load();
+    _loadMore();
+  }
+
+  void _onFilter({String? name, String? document, bool? active}) {
+    setState(() {
+      _filterName = name;
+      _filterDocument = document;
+      _filterActive = active;
+      _reset();
+    });
+    _loadMore();
   }
 
   Future<void> _openForm([Member? member]) async {
@@ -82,7 +110,7 @@ class _MembersPageState extends State<MembersPage> {
       } else {
         await widget.service.update(result);
       }
-      _load();
+      _refresh();
     } on MemberFailure catch (e) {
       if (mounted) _showError(e.message);
     }
@@ -93,7 +121,7 @@ class _MembersPageState extends State<MembersPage> {
     if (!confirmed) return;
     try {
       await widget.service.delete(member.id);
-      _load();
+      _refresh();
     } on MemberFailure catch (e) {
       if (mounted) _showError(e.message);
     }
@@ -146,18 +174,24 @@ class _MembersPageState extends State<MembersPage> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: MembersTable(
-                  members: _members,
-                  total: _total,
-                  page: _page,
-                  pageSize: _pageSize,
-                  onPageChanged: _onPageChanged,
-                  onSort: _onSort,
-                  sortKey: _sortBy,
-                  sortAscending: _sortAscending,
-                  onEdit: _openForm,
-                  onDelete: _confirmDelete,
-                  loading: _loading,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    MemberFilterBar(onFilter: _onFilter),
+                    Expanded(
+                      child: MembersTable(
+                        members: _members,
+                        onSort: _onSort,
+                        sortKey: _sortBy,
+                        sortAscending: _sortAscending,
+                        onEdit: _openForm,
+                        onDelete: _confirmDelete,
+                        loading: _loading,
+                        onLoadMore: _loadMore,
+                        hasMore: _hasMore,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

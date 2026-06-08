@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/addresses/data/addresses_service.dart';
 import 'package:organizagrana/features/addresses/domain/address.dart';
+import 'package:organizagrana/features/categories/data/categories_service.dart';
+import 'package:organizagrana/features/categories/domain/category.dart';
 import 'package:organizagrana/features/connections/data/connections_service.dart';
 import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/features/connections/domain/connection_failure.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connection_delete_dialog.dart';
+import 'package:organizagrana/features/connections/presentation/widgets/connection_form_dialog.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connection_summary_cards.dart';
-import 'package:organizagrana/features/connections/presentation/widgets/connection_view_dialog.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connections_table.dart';
+import 'package:organizagrana/features/members/data/members_service.dart';
+import 'package:organizagrana/features/members/domain/member.dart';
 
 class ConnectionsPage extends StatefulWidget {
   const ConnectionsPage({
     super.key,
     required this.service,
     required this.addressesService,
+    required this.membersService,
+    required this.categoriesService,
   });
 
   final ConnectionsService service;
   final AddressesService addressesService;
+  final MembersService membersService;
+  final CategoriesService categoriesService;
 
   @override
   State<ConnectionsPage> createState() => _ConnectionsPageState();
@@ -27,6 +35,8 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   List<Connection> _connections = [];
   ConnectionSummary? _summary;
   List<Address> _addresses = [];
+  List<Member> _members = [];
+  List<Category> _categories = [];
   int _total = 0;
   int _page = 1;
   static const int _pageSize = 5;
@@ -45,6 +55,8 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     _load();
     _loadSummary();
     _loadAddresses();
+    _loadMembers();
+    _loadCategories();
   }
 
   Future<void> _load() async {
@@ -75,6 +87,13 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
           _loading = false;
         });
       }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -83,18 +102,35 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
       final summary = await widget.service.summary();
       if (mounted) setState(() => _summary = summary);
     } on ConnectionFailure {
-      // summary é não-crítico, ignora silenciosamente
+      // não-crítico
     }
   }
 
   Future<void> _loadAddresses() async {
     try {
-      // Carrega todos os logradouros para popular o dropdown (pageSize grande)
       final result = await widget.addressesService.list(pageSize: 200);
       if (mounted) setState(() => _addresses = result.addresses);
-    } catch (_) {
-      // dropdown fica vazio, não bloqueia a tela
-    }
+    } catch (_) {}
+  }
+
+  Future<void> _loadMembers() async {
+    try {
+      final result = await widget.membersService.list(pageSize: 200);
+      if (mounted) setState(() => _members = result.members);
+    } catch (_) {}
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final result = await widget.categoriesService.list(pageSize: 200);
+      if (mounted) setState(() => _categories = result.categories);
+    } catch (_) {}
+  }
+
+  void _refresh() {
+    setState(() => _page = 1);
+    _load();
+    _loadSummary();
   }
 
   void _onPageChanged(int page) {
@@ -116,16 +152,28 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     _load();
   }
 
-  Future<void> _onView(Connection connection) =>
-      showConnectionViewDialog(context, connection);
+  Future<void> _openForm({Connection? connection}) async {
+    final saved = await showConnectionFormDialog(
+      context,
+      connection: connection,
+      members: _members,
+      addresses: _addresses,
+      categories: _categories,
+      onSave: (c) => connection == null
+          ? widget.service.create(c)
+          : widget.service.update(c),
+    );
+    if (saved) _refresh();
+  }
+
+  Future<void> _onEdit(Connection connection) => _openForm(connection: connection);
 
   Future<void> _onDelete(Connection connection) async {
     final confirmed = await showConnectionDeleteDialog(context, connection);
     if (!confirmed) return;
     try {
       await widget.service.delete(connection.id);
-      _load();
-      _loadSummary();
+      _refresh();
     } on ConnectionFailure catch (e) {
       if (mounted) _showError(e.message);
     }
@@ -159,6 +207,12 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
+              ),
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: _openForm,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Nova Ligação'),
               ),
             ],
           ),
@@ -201,7 +255,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
                   onSort: _onSort,
                   sortKey: _sortBy,
                   sortAscending: _sortAscending,
-                  onView: _onView,
+                  onEdit: _onEdit,
                   onDelete: _onDelete,
                   loading: _loading,
                 ),
@@ -276,7 +330,7 @@ class _FiltersRowState extends State<_FiltersRow> {
                     (a) => DropdownMenuItem(
                       value: a.id,
                       child: Text(
-                        '${a.type} ${a.name}',
+                        '${a.addressType} ${a.name}',
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -307,18 +361,6 @@ class _FiltersRowState extends State<_FiltersRow> {
                   widget.onActiveChanged(v);
                 },
               ),
-            ),
-            const Spacer(),
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.tune, size: 16),
-              label: const Text('Filtros Avançados'),
-            ),
-            const SizedBox(width: 8),
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.download_outlined, size: 16),
-              label: const Text('Exportar'),
             ),
           ],
         ),

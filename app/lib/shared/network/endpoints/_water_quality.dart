@@ -7,4 +7,5 @@ class _WaterQuality {
 
   String get list => _path;
   String get create => _path;
+  String get delete => _path;
 }

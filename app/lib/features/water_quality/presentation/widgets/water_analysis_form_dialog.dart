@@ -87,12 +87,15 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Text('Período de Referência:', style: theme.textTheme.labelMedium),
+                Flexible(
+                  child: Text('Período de Referência:', style: theme.textTheme.labelMedium),
+                ),
                 const SizedBox(width: 12),
                 SizedBox(
-                  width: 140,
+                  width: 180,
                   child: DropdownButtonFormField<int>(
                     initialValue: _month,
+                    isExpanded: true,
                     decoration: const InputDecoration(isDense: true),
                     items: List.generate(
                       12,
@@ -106,9 +109,10 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  width: 90,
+                  width: 100,
                   child: DropdownButtonFormField<int>(
                     initialValue: _year,
+                    isExpanded: true,
                     decoration: const InputDecoration(isDense: true),
                     items: years
                         .map((y) => DropdownMenuItem(
@@ -123,11 +127,11 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
             ),
             const SizedBox(height: 16),
             // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
-                  const SizedBox(width: 160),
+                  SizedBox(width: 160),
                   _HeaderCell('Exigido'),
                   _HeaderCell('Analisado'),
                   _HeaderCell('Conformidade'),

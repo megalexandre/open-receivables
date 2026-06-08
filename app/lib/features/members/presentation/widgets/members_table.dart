@@ -1,53 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
 import 'package:organizagrana/shared/widgets/data_display/app_table.dart';
-import 'package:organizagrana/shared/widgets/data_display/yes_no_badge.dart';
 
 class MembersTable extends StatelessWidget {
   const MembersTable({
     super.key,
     required this.members,
-    required this.total,
-    required this.page,
-    required this.pageSize,
-    required this.onPageChanged,
     required this.onEdit,
     required this.onDelete,
     this.onSort,
     this.sortKey,
     this.sortAscending = true,
     this.loading = false,
+    this.onLoadMore,
+    this.hasMore = false,
   });
 
   final List<Member> members;
-  final int total;
-  final int page;
-  final int pageSize;
-  final void Function(int page) onPageChanged;
   final void Function(Member) onEdit;
   final void Function(Member) onDelete;
   final void Function(String key, bool ascending)? onSort;
   final String? sortKey;
   final bool sortAscending;
   final bool loading;
+  final VoidCallback? onLoadMore;
+  final bool hasMore;
 
   @override
   Widget build(BuildContext context) {
     return AppTable<Member>(
       items: members,
-      total: total,
-      page: page,
-      pageSize: pageSize,
-      onPageChanged: onPageChanged,
+      total: members.length,
+      page: 1,
+      pageSize: members.length,
+      onPageChanged: (_) {},
       striped: true,
       onSort: onSort,
       sortKey: sortKey,
       sortAscending: sortAscending,
       loading: loading,
+      onLoadMore: onLoadMore,
+      hasMore: hasMore,
       columns: [
         AppTableColumn(
           label: 'Número',
-          sortKey: 'memberNumber',
+          sortKey: 'member_number',
           builder: (m) => Text(m.memberNumber),
         ),
         AppTableColumn(
@@ -57,13 +54,7 @@ class MembersTable extends StatelessWidget {
         ),
         AppTableColumn(
           label: 'Documento',
-          sortKey: 'document',
           builder: (m) => Text(m.document),
-        ),
-        AppTableColumn(
-          label: 'Ativo',
-          sortKey: 'active',
-          builder: (m) => YesNoBadge(value: m.active),
         ),
         AppTableColumn(
           label: 'Ações',
@@ -72,13 +63,18 @@ class MembersTable extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
+                icon: const Icon(Icons.edit_outlined, size: 16),
                 tooltip: 'Editar',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 onPressed: () => onEdit(m),
               ),
+              const SizedBox(width: 4),
               IconButton(
-                icon: const Icon(Icons.delete_outline, size: 18),
+                icon: const Icon(Icons.delete_outline, size: 16),
                 tooltip: 'Excluir',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 onPressed: () => onDelete(m),
               ),
             ],

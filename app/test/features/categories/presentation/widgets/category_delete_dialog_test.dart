@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:organizagrana/features/categories/domain/category.dart';
-import 'package:organizagrana/features/categories/presentation/widgets/category_delete_dialog.dart';
+import 'package:organizagrana/features/categories/presentation/widgets/category_dialog/category_delete_dialog.dart';
 
 const _category = Category(
   id: '1',
   name: 'Água',
+  groupId: null,
   waterMeter: false,
   waterValue: 0,
   memberValue: 0,

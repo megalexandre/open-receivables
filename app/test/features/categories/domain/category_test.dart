@@ -54,7 +54,7 @@ void main() {
 
     test('zero quando ambos são zero', () {
       const c = Category(
-        id: '', name: '',
+        id: '', name: '', groupId: null,
         waterMeter: false, waterValue: 0, memberValue: 0,
       );
       expect(c.total, 0.0);

@@ -39,11 +39,12 @@ class WaterQualityService {
         reference: reference,
       );
       final data = (json['data'] as List).cast<Map<String, dynamic>>();
+      final pagination = json['pagination'] as Map<String, dynamic>;
       return WaterQualityResult(
         analyses: data.map(WaterAnalysis.fromJson).toList(),
-        total: (json['total'] as num).toInt(),
-        page: (json['page'] as num).toInt(),
-        pageSize: (json['pageSize'] as num).toInt(),
+        total: (pagination['total_count'] as num).toInt(),
+        page: (pagination['current_page'] as num).toInt(),
+        pageSize: (pagination['per_page'] as num).toInt(),
       );
     } on AppFailure catch (e) {
       throw WaterQualityFailure(e.type);
@@ -53,6 +54,14 @@ class WaterQualityService {
   Future<void> create(WaterAnalysisBatch batch) async {
     try {
       await _apiClient.create(batch);
+    } on AppFailure catch (e) {
+      throw WaterQualityFailure(e.type);
+    }
+  }
+
+  Future<void> delete(String reference) async {
+    try {
+      await _apiClient.delete(reference);
     } on AppFailure catch (e) {
       throw WaterQualityFailure(e.type);
     }
