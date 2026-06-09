@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
 import 'package:organizagrana/shared/widgets/data_display/app_table.dart';
+import 'package:organizagrana/shared/widgets/data_display/document_text.dart';
+import 'package:organizagrana/shared/widgets/data_display/yes_no_badge.dart';
 
 class MembersTable extends StatelessWidget {
   const MembersTable({
@@ -45,7 +47,7 @@ class MembersTable extends StatelessWidget {
         AppTableColumn(
           label: 'Número',
           sortKey: 'member_number',
-          builder: (m) => Text(m.memberNumber),
+          builder: (m) => Text(m.memberNumber?.toString() ?? ''),
         ),
         AppTableColumn(
           label: 'Nome',
@@ -54,7 +56,11 @@ class MembersTable extends StatelessWidget {
         ),
         AppTableColumn(
           label: 'Documento',
-          builder: (m) => Text(m.document),
+          builder: (m) => DocumentText(m.document),
+        ),
+        AppTableColumn(
+          label: 'Votante',
+          builder: (m) => YesNoBadge(value: m.voter),
         ),
         AppTableColumn(
           label: 'Ações',

@@ -102,18 +102,18 @@ class _MembersPageState extends State<MembersPage> {
   }
 
   Future<void> _openForm([Member? member]) async {
-    final result = await MemberFormDialog.show(context, member);
-    if (result == null) return;
-    try {
-      if (member == null) {
-        await widget.service.create(result);
-      } else {
-        await widget.service.update(result);
-      }
-      _refresh();
-    } on MemberFailure catch (e) {
-      if (mounted) _showError(e.message);
-    }
+    final saved = await showMemberFormDialog(
+      context,
+      member: member,
+      onSave: (result) async {
+        if (member == null) {
+          await widget.service.create(result);
+        } else {
+          await widget.service.update(result);
+        }
+      },
+    );
+    if (saved) _refresh();
   }
 
   Future<void> _confirmDelete(Member member) async {

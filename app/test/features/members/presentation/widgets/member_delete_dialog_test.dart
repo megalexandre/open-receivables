@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:organizagrana/features/categories/domain/category.dart';
-import 'package:organizagrana/features/categories/presentation/widgets/category_dialog/category_delete_dialog.dart';
+import 'package:organizagrana/features/members/domain/member.dart';
+import 'package:organizagrana/features/members/presentation/widgets/member_delete_dialog.dart';
 
-const _category = Category(
+const _member = Member(
   id: '1',
-  name: 'Água',
-  memberType: null,
-  waterMeter: false,
-  waterValue: 0,
-  memberValue: 0,
+  name: 'Ana Lima',
+  document: '12345678901',
 );
 
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
-  testWidgets('exibe o nome da categoria na mensagem', (tester) async {
+  testWidgets('exibe o nome do sócio na mensagem', (tester) async {
     await tester.pumpWidget(_wrap(Builder(
       builder: (ctx) => TextButton(
-        onPressed: () => showCategoryDeleteDialog(ctx, _category),
+        onPressed: () => showMemberDeleteDialog(ctx, _member),
         child: const Text('abrir'),
       ),
     )));
@@ -26,7 +23,7 @@ void main() {
     await tester.tap(find.text('abrir'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Água'), findsOneWidget);
+    expect(find.textContaining('Ana Lima'), findsOneWidget);
   });
 
   testWidgets('retorna false ao cancelar', (tester) async {
@@ -35,7 +32,7 @@ void main() {
     await tester.pumpWidget(_wrap(Builder(
       builder: (ctx) => TextButton(
         onPressed: () async {
-          result = await showCategoryDeleteDialog(ctx, _category);
+          result = await showMemberDeleteDialog(ctx, _member);
         },
         child: const Text('abrir'),
       ),
@@ -55,7 +52,7 @@ void main() {
     await tester.pumpWidget(_wrap(Builder(
       builder: (ctx) => TextButton(
         onPressed: () async {
-          result = await showCategoryDeleteDialog(ctx, _category);
+          result = await showMemberDeleteDialog(ctx, _member);
         },
         child: const Text('abrir'),
       ),

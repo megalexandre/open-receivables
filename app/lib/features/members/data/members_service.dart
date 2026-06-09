@@ -3,6 +3,9 @@ import 'package:organizagrana/features/members/domain/member.dart';
 import 'package:organizagrana/features/members/domain/member_failure.dart';
 import 'package:organizagrana/shared/errors/app_failure.dart';
 
+export 'package:organizagrana/shared/errors/app_failure.dart'
+    show ValidationFailure, ApiValidationError;
+
 class MembersResult {
   const MembersResult({
     required this.members,
@@ -59,6 +62,8 @@ class MembersService {
     try {
       final json = await _apiClient.create(member);
       return Member.fromJson(json);
+    } on ValidationFailure {
+      rethrow;
     } on AppFailure catch (e) {
       throw MemberFailure(e.type);
     }
@@ -68,6 +73,8 @@ class MembersService {
     try {
       final json = await _apiClient.update(member);
       return Member.fromJson(json);
+    } on ValidationFailure {
+      rethrow;
     } on AppFailure catch (e) {
       throw MemberFailure(e.type);
     }

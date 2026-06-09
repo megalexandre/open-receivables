@@ -11,7 +11,7 @@ Future<bool> showCategoryDeleteDialog(
     builder: (dialogContext) => AppDialog(
       title: 'Excluir Categoria',
       content: Text(
-        'Tem certeza que deseja excluir a categoria "${category.subCategoryName}/${category.name}"?',
+        'Tem certeza que deseja excluir a categoria "${category.memberType != null ? '${category.memberType}/' : ''}${category.name}"?',
       ),
       actions: [
         TextButton(

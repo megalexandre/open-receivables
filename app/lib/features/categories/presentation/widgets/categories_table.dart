@@ -54,7 +54,7 @@ class CategoriesTable extends StatelessWidget {
       onLoadMore: onLoadMore,
       hasMore: hasMore,
       columns: [
-        AppTableColumn(label: 'Grupo', sortKey: 'group_id', builder: (c) => SubcategoryText(value: c.groupId)),
+        AppTableColumn(label: 'Grupo', sortKey: 'member_type', builder: (c) => SubcategoryText(value: c.memberType)),
         AppTableColumn(label: 'Nome', sortKey: 'name', builder: (c) => Text(c.name)),
         AppTableColumn(label: 'Hidrômetro', sortKey: 'has_hydrometer', builder: (c) => YesNoBadge(value: c.waterMeter)),
         AppTableColumn(label: 'Valor Água (R\$)', sortKey: 'amount_water', numeric: true, builder: (c) => MoneyText(c.waterValue)),

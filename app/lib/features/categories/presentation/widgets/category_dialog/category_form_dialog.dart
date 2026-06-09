@@ -39,7 +39,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
 
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descricaoCtrl;
-  int? _groupId;
+  String? _memberType;
   late bool _waterMeter;
   late final TextEditingController _waterValueCtrl;
   late final TextEditingController _memberValueCtrl;
@@ -53,7 +53,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
     final c = widget.category;
     _nameCtrl = TextEditingController(text: c?.name ?? '');
     _descricaoCtrl = TextEditingController(text: c?.descricao ?? '');
-    _groupId = c?.groupId;
+    _memberType = c?.memberType;
     _waterMeter = c?.waterMeter ?? false;
     _waterValueCtrl = TextEditingController(
       text: c != null ? c.waterValue.toStringAsFixed(2) : '',
@@ -77,7 +77,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
         name: _nameCtrl.text.trim(),
         descricao:
             _descricaoCtrl.text.trim().isEmpty ? null : _descricaoCtrl.text.trim(),
-        groupId: _groupId,
+        memberType: _memberType,
         waterMeter: _waterMeter,
         waterValue: double.tryParse(
               _waterValueCtrl.text.replaceAll('.', '').replaceAll(',', '.'),
@@ -161,8 +161,8 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             const SizedBox(height: 12),
             const _Label('Grupo'),
             SubcategoryDropdown(
-              initialValue: _groupId,
-              onChanged: (v) => setState(() => _groupId = v),
+              initialValue: _memberType,
+              onChanged: (v) => setState(() => _memberType = v),
             ),
             const SizedBox(height: 12),
             const _Label('Hidrômetro?'),

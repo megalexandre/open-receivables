@@ -22,7 +22,7 @@ class ApiValidationError {
   final ApiErrorCode errorCode;
   final String field;
 
-  String messageFor([ErrorParams params = const {}]) => errorCode.message(params);
+  String messageFor([ErrorParams params = const {}]) => errorCode.messageFor(params);
 
   factory ApiValidationError.fromJson(Map<String, dynamic> json) =>
       ApiValidationError(
