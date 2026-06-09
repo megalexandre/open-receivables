@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/caixa"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": "cx-1", "member_name": "Ricardo Oliveira Santos",  "number": "0042-88", "payment_date": "2023-10-15", "payment_method": "PIX",      "value": 156.00 },
+        { "id": "cx-2", "member_name": "Ana Beatriz Ferreira",     "number": "0129-12", "payment_date": "2023-10-15", "payment_method": "DINHEIRO",  "value": 89.50  },
+        { "id": "cx-3", "member_name": "Carlos Eduardo Mendes",    "number": "0088-44", "payment_date": "2023-10-14", "payment_method": "CARTÃO",    "value": 210.00 },
+        { "id": "cx-4", "member_name": "Mariana Lopes Costa",      "number": "0231-01", "payment_date": "2023-10-14", "payment_method": "PIX",       "value": 45.00  },
+        { "id": "cx-5", "member_name": "João Pedro Martins",       "number": "0155-77", "payment_date": "2023-10-14", "payment_method": "BOLETO",    "value": 132.40 },
+        { "id": "cx-6", "member_name": "Fernanda Silveira",        "number": "0099-33", "payment_date": "2023-10-13", "payment_method": "CARTÃO",    "value": 290.00 }
+      ],
+      "total": 1884,
+      "total_value": 64011.50,
+      "page": 1,
+      "pageSize": 50
+    }
+  }
+}

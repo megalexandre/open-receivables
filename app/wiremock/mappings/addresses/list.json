@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/addresses"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": "addr-1", "type": "Rua",     "name": "das Flores",         "base_cep": "04578-000" },
+        { "id": "addr-2", "type": "Avenida", "name": "Principal",          "base_cep": "01419-001" },
+        { "id": "addr-3", "type": "Rua",     "name": "Santa Fé",           "base_cep": "01001-000" },
+        { "id": "addr-4", "type": "Rua",     "name": "das Azaleias",       "base_cep": "01311-000" },
+        { "id": "addr-5", "type": "Travessa","name": "Maranhão",            "base_cep": "01305-100" },
+        { "id": "addr-6", "type": "Avenida", "name": "Brasil",             "base_cep": "04578-100" },
+        { "id": "addr-7", "type": "Rua",     "name": "Sete de Setembro",   "base_cep": "04578-200" },
+        { "id": "addr-8", "type": "Alameda", "name": "Santos",             "base_cep": "01419-002" }
+      ],
+      "total": 8,
+      "page": 1,
+      "pageSize": 200
+    }
+  }
+}

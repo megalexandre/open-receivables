@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "DELETE",
+    "urlPathPattern": "/boletos/.*"
+  },
+  "response": {
+    "status": 204
+  }
+}

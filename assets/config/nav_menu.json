@@ -1,5 +1,0 @@
-[
-  { "type": "item", "id": "home", "label": "Home", "icon": "home" },
-  { "type": "item", "id": "members", "label": "Sócios", "icon": "group" },
-  { "type": "item", "id": "categories", "label": "Categorias", "icon": "category" }
-]

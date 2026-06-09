@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/connections"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        { "id": "con-1", "member_name": "Adriano dos Santos",       "address": "Rua das Flores, 120 - Centro",       "active": true,  "category_name": "Residencial A", "value": 45.50  },
+        { "id": "con-2", "member_name": "Bento Gonçalves Pereira",  "address": "Av. Principal, 45 - Industrial",      "active": true,  "category_name": "Comercial",     "value": 120.00 },
+        { "id": "con-3", "member_name": "Carlos Eduardo Magalhães", "address": "Rua Santa Fé, s/n - Rural",           "active": false, "category_name": "Residencial B", "value": 8.00   },
+        { "id": "con-4", "member_name": "Débora Regina Hoffmann",   "address": "Rua das Azaleias, 782 - Centro",     "active": true,  "category_name": "Residencial A", "value": 52.15  },
+        { "id": "con-5", "member_name": "Esmeralda Rocha",          "address": "Travessa Maranhão, 12 - Vila Nova",  "active": true,  "category_name": "Social",        "value": 15.00  }
+      ],
+      "total": 1284,
+      "page": 1,
+      "pageSize": 5
+    }
+  }
+}

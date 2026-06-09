@@ -1,0 +1,4 @@
+{
+  "request": { "method": "DELETE", "urlPathPattern": "/addresses/.*" },
+  "response": { "status": 204 }
+}

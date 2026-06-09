@@ -1,0 +1,90 @@
+import 'package:organizagrana/features/members/data/members_api_client.dart';
+import 'package:organizagrana/features/members/domain/member.dart';
+import 'package:organizagrana/features/members/domain/member_failure.dart';
+import 'package:organizagrana/shared/errors/app_failure.dart';
+
+export 'package:organizagrana/shared/errors/app_failure.dart'
+    show ValidationFailure, ApiValidationError;
+
+class MembersResult {
+  const MembersResult({
+    required this.members,
+    required this.total,
+    required this.page,
+    required this.pageSize,
+  });
+
+  final List<Member> members;
+  final int total;
+  final int page;
+  final int pageSize;
+}
+
+class MembersService {
+  MembersService({required MembersApiClient apiClient})
+      : _apiClient = apiClient;
+
+  final MembersApiClient _apiClient;
+
+  Future<MembersResult> list({
+    int page = 1,
+    int pageSize = 20,
+    String? sortBy,
+    bool sortAscending = true,
+    String? name,
+    String? document,
+    bool? active,
+  }) async {
+    try {
+      final json = await _apiClient.list(
+        page: page,
+        pageSize: pageSize,
+        sortBy: sortBy,
+        sortAscending: sortAscending,
+        name: name,
+        document: document,
+        active: active,
+      );
+      final data = (json['data'] as List).cast<Map<String, dynamic>>();
+      final pagination = json['pagination'] as Map<String, dynamic>;
+      return MembersResult(
+        members: data.map(Member.fromJson).toList(),
+        total: (pagination['total_count'] as num).toInt(),
+        page: (pagination['current_page'] as num).toInt(),
+        pageSize: (pagination['per_page'] as num).toInt(),
+      );
+    } on AppFailure catch (e) {
+      throw MemberFailure(e.type);
+    }
+  }
+
+  Future<Member> create(Member member) async {
+    try {
+      final json = await _apiClient.create(member);
+      return Member.fromJson(json);
+    } on ValidationFailure {
+      rethrow;
+    } on AppFailure catch (e) {
+      throw MemberFailure(e.type);
+    }
+  }
+
+  Future<Member> update(Member member) async {
+    try {
+      final json = await _apiClient.update(member);
+      return Member.fromJson(json);
+    } on ValidationFailure {
+      rethrow;
+    } on AppFailure catch (e) {
+      throw MemberFailure(e.type);
+    }
+  }
+
+  Future<void> delete(String id) async {
+    try {
+      await _apiClient.delete(id);
+    } on AppFailure catch (e) {
+      throw MemberFailure(e.type);
+    }
+  }
+}

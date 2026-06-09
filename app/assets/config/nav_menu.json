@@ -1,0 +1,14 @@
+[
+  { "type": "item", "id": "home", "label": "Home", "icon": "home" },
+  { "type": "header", "label": "Cadastros" },
+  { "type": "item", "id": "members", "label": "Sócios", "icon": "group", "indent": true },
+  { "type": "item", "id": "addresses", "label": "Logradouros", "icon": "location_on", "indent": true },
+  { "type": "item", "id": "categories", "label": "Categorias", "icon": "category", "indent": true },
+  { "type": "header", "label": "Água" },
+  { "type": "item", "id": "connections", "label": "Ligações", "icon": "water_drop", "indent": true },
+  { "type": "item", "id": "water-quality", "label": "Qualidade", "icon": "science", "indent": true },
+  { "type": "header", "label": "Financeiro" },
+  { "type": "item", "id": "generate-invoices", "label": "Gerar Faturas", "icon": "post_add", "indent": true },
+  { "type": "item", "id": "boletos", "label": "Faturas", "icon": "receipt_long", "indent": true },
+  { "type": "item", "id": "caixa", "label": "Caixa", "icon": "account_balance_wallet", "indent": true }
+]

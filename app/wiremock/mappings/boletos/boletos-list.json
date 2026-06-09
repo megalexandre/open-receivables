@@ -1,0 +1,67 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/boletos"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        {
+          "id": "b1",
+          "number": "257303",
+          "member_name": "Estevão Lourenço Silva",
+          "address": "Travessa Padre Alfredo, 45",
+          "competencia": "10/2025",
+          "valor_total": 30.00,
+          "vencimento": "10/04/2025",
+          "status": "paga"
+        },
+        {
+          "id": "b2",
+          "number": "257404",
+          "member_name": "Cícero Madalena dos Santos",
+          "address": "Avenida Fernando de Noronha, 201",
+          "competencia": "02/2055",
+          "valor_total": 30.00,
+          "vencimento": "10/03/2055",
+          "status": "paga"
+        },
+        {
+          "id": "b3",
+          "number": "256348",
+          "member_name": "Hilio Francisco de Andrade",
+          "address": "Rua da Concórdia, 88",
+          "competencia": "10/2030",
+          "valor_total": 30.00,
+          "vencimento": "10/11/2026",
+          "status": "aberta"
+        },
+        {
+          "id": "b4",
+          "number": "256185",
+          "member_name": "Eliezer Santos Carvalho",
+          "address": "Avenida Fernando de Noronha, 512",
+          "competencia": "10/2030",
+          "valor_total": 30.00,
+          "vencimento": "10/11/2026",
+          "status": "aberta"
+        },
+        {
+          "id": "b5",
+          "number": "257082",
+          "member_name": "Urbano Ermelino Gomes",
+          "address": "Travessa Padre Alfredo, 12",
+          "competencia": "10/2030",
+          "valor_total": 30.00,
+          "vencimento": "10/11/2026",
+          "status": "paga"
+        }
+      ],
+      "total": 14280,
+      "page": 1,
+      "pageSize": 10
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/boletos"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "id": "b-new",
+      "number": "257999",
+      "member_name": "Novo Sócio",
+      "address": "Rua Nova, 1",
+      "competencia": "06/2026",
+      "valor_total": 30.00,
+      "vencimento": "10/07/2026",
+      "status": "aberta"
+    }
+  }
+}
