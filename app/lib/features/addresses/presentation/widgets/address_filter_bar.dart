@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 
-const _addressTypes = ['Alameda', 'Avenida', 'Fazenda', 'Praça', 'Rua', 'Sítio', 'Travessa', 'Vila'];
+const _addressTypes = [
+  'Alameda',
+  'Avenida',
+  'Fazenda',
+  'Praça',
+  'Rua',
+  'Sítio',
+  'Travessa',
+  'Vila',
+];
 
 class AddressFilterBar extends StatefulWidget {
   const AddressFilterBar({super.key, required this.onFilter});
@@ -8,10 +17,10 @@ class AddressFilterBar extends StatefulWidget {
   final void Function({String? addressType, String? name}) onFilter;
 
   @override
-  State<AddressFilterBar> createState() => _AddressFilterBarState();
+  State<AddressFilterBar> createState() => AddressFilterBarState();
 }
 
-class _AddressFilterBarState extends State<AddressFilterBar> {
+class AddressFilterBarState extends State<AddressFilterBar> {
   String? _addressType;
   final _nameCtrl = TextEditingController();
 
@@ -28,13 +37,15 @@ class _AddressFilterBarState extends State<AddressFilterBar> {
     );
   }
 
-  void _clear() {
+  void clear() {
     setState(() {
       _addressType = null;
       _nameCtrl.clear();
     });
     widget.onFilter(addressType: null, name: null);
   }
+
+  bool get _hasFilters => _addressType != null || _nameCtrl.text.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +65,7 @@ class _AddressFilterBarState extends State<AddressFilterBar> {
                   (t) => DropdownMenuItem(value: t, child: Text(t)),
                 ),
               ],
-              onChanged: (v) {
-                setState(() => _addressType = v);
-                _notify();
-              },
+              onChanged: (v) => setState(() => _addressType = v),
             ),
           ),
           const SizedBox(width: 12),
@@ -70,15 +78,18 @@ class _AddressFilterBarState extends State<AddressFilterBar> {
                 isDense: true,
                 prefixIcon: Icon(Icons.search, size: 16),
               ),
-              onChanged: (_) => _notify(),
+              onSubmitted: (_) => _notify(),
             ),
           ),
+          const Spacer(),
+          if (_hasFilters)
+            TextButton(onPressed: clear, child: const Text('Limpar')),
           const SizedBox(width: 8),
-          if (_addressType != null || _nameCtrl.text.isNotEmpty)
-            TextButton(
-              onPressed: _clear,
-              child: const Text('Limpar'),
-            ),
+          FilledButton.icon(
+            onPressed: _notify,
+            icon: const Icon(Icons.search, size: 16),
+            label: const Text('Consultar'),
+          ),
         ],
       ),
     );

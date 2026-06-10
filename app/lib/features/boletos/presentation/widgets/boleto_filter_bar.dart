@@ -12,10 +12,10 @@ class BoletoFilterBar extends StatefulWidget {
   final VoidCallback onPrint;
 
   @override
-  State<BoletoFilterBar> createState() => _BoletoFilterBarState();
+  State<BoletoFilterBar> createState() => BoletoFilterBarState();
 }
 
-class _BoletoFilterBarState extends State<BoletoFilterBar> {
+class BoletoFilterBarState extends State<BoletoFilterBar> {
   final _numberCtrl = TextEditingController();
   final _memberCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
@@ -33,7 +33,7 @@ class _BoletoFilterBarState extends State<BoletoFilterBar> {
     super.dispose();
   }
 
-  void _clear() {
+  void clear() {
     setState(() {
       _numberCtrl.clear();
       _memberCtrl.clear();
@@ -46,20 +46,26 @@ class _BoletoFilterBarState extends State<BoletoFilterBar> {
   }
 
   void _consult() {
-    widget.onFilter(BoletoFilter(
-      number: _numberCtrl.text.trim().isEmpty ? null : _numberCtrl.text.trim(),
-      memberSearch:
-          _memberCtrl.text.trim().isEmpty ? null : _memberCtrl.text.trim(),
-      status: _status,
-      addressSearch:
-          _addressCtrl.text.trim().isEmpty ? null : _addressCtrl.text.trim(),
-      competencia: _competenciaCtrl.text.trim().isEmpty
-          ? null
-          : _competenciaCtrl.text.trim(),
-      vencimento: _vencimentoCtrl.text.trim().isEmpty
-          ? null
-          : _vencimentoCtrl.text.trim(),
-    ));
+    widget.onFilter(
+      BoletoFilter(
+        number: _numberCtrl.text.trim().isEmpty
+            ? null
+            : _numberCtrl.text.trim(),
+        memberSearch: _memberCtrl.text.trim().isEmpty
+            ? null
+            : _memberCtrl.text.trim(),
+        status: _status,
+        addressSearch: _addressCtrl.text.trim().isEmpty
+            ? null
+            : _addressCtrl.text.trim(),
+        competencia: _competenciaCtrl.text.trim().isEmpty
+            ? null
+            : _competenciaCtrl.text.trim(),
+        vencimento: _vencimentoCtrl.text.trim().isEmpty
+            ? null
+            : _vencimentoCtrl.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -75,19 +81,36 @@ class _BoletoFilterBarState extends State<BoletoFilterBar> {
                 const SizedBox(width: 12),
                 _statusDropdown(),
                 const SizedBox(width: 12),
-                _field('Sócio', _memberCtrl, hint: 'Nome ou número', width: 180),
+                _field(
+                  'Sócio',
+                  _memberCtrl,
+                  hint: 'Nome ou número',
+                  width: 180,
+                ),
                 const SizedBox(width: 12),
-                _field('Endereço', _addressCtrl,
-                    hint: 'Av. Fernando...', width: 180),
+                _field(
+                  'Endereço',
+                  _addressCtrl,
+                  hint: 'Av. Fernando...',
+                  width: 180,
+                ),
                 const SizedBox(width: 12),
-                _field('Competência', _competenciaCtrl,
-                    hint: 'MM/AAAA', width: 110),
+                _field(
+                  'Competência',
+                  _competenciaCtrl,
+                  hint: 'MM/AAAA',
+                  width: 110,
+                ),
                 const SizedBox(width: 12),
-                _field('Vencimento', _vencimentoCtrl,
-                    hint: 'dd/MM/aaaa', width: 120),
+                _field(
+                  'Vencimento',
+                  _vencimentoCtrl,
+                  hint: 'dd/MM/aaaa',
+                  width: 120,
+                ),
                 const Spacer(),
                 TextButton.icon(
-                  onPressed: _clear,
+                  onPressed: clear,
                   icon: const Icon(Icons.refresh_outlined, size: 16),
                   label: const Text('Limpar'),
                 ),
@@ -111,22 +134,22 @@ class _BoletoFilterBarState extends State<BoletoFilterBar> {
     );
   }
 
-  Widget _field(String label, TextEditingController ctrl,
-      {String? hint, double width = 160}) {
+  Widget _field(
+    String label,
+    TextEditingController ctrl, {
+    String? hint,
+    double width = 160,
+  }) {
     return SizedBox(
       width: width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: Theme.of(context).textTheme.labelSmall),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
           const SizedBox(height: 4),
           TextFormField(
             controller: ctrl,
-            decoration: InputDecoration(
-              hintText: hint,
-              isDense: true,
-            ),
+            decoration: InputDecoration(hintText: hint, isDense: true),
           ),
         ],
       ),

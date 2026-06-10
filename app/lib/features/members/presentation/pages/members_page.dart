@@ -6,6 +6,7 @@ import 'package:organizagrana/features/members/presentation/widgets/member_delet
 import 'package:organizagrana/features/members/presentation/widgets/member_filter_bar.dart';
 import 'package:organizagrana/features/members/presentation/widgets/member_form_dialog.dart';
 import 'package:organizagrana/features/members/presentation/widgets/members_table.dart';
+import 'package:organizagrana/shared/widgets/form/clear_filters_on_escape.dart';
 
 class MembersPage extends StatefulWidget {
   const MembersPage({super.key, required this.service});
@@ -17,6 +18,7 @@ class MembersPage extends StatefulWidget {
 }
 
 class _MembersPageState extends State<MembersPage> {
+  final _filterBarKey = GlobalKey<MemberFilterBarState>();
   List<Member> _members = [];
   int _total = 0;
   int _page = 1;
@@ -135,68 +137,71 @@ class _MembersPageState extends State<MembersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sócios',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Gerencie os sócios da cooperativa.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const Spacer(),
-              FilledButton.icon(
-                onPressed: () => _openForm(),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Novo Sócio'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
-            ),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+    return ClearFiltersOnEscape(
+      onClear: () => _filterBarKey.currentState?.clear(),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MemberFilterBar(onFilter: _onFilter),
-                    Expanded(
-                      child: MembersTable(
-                        members: _members,
-                        onSort: _onSort,
-                        sortKey: _sortBy,
-                        sortAscending: _sortAscending,
-                        onEdit: _openForm,
-                        onDelete: _confirmDelete,
-                        loading: _loading,
-                        onLoadMore: _loadMore,
-                        hasMore: _hasMore,
-                      ),
+                    Text(
+                      'Sócios',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Gerencie os sócios da cooperativa.',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
+                const Spacer(),
+                FilledButton.icon(
+                  onPressed: () => _openForm(),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Novo Sócio'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      MemberFilterBar(key: _filterBarKey, onFilter: _onFilter),
+                      Expanded(
+                        child: MembersTable(
+                          members: _members,
+                          onSort: _onSort,
+                          sortKey: _sortBy,
+                          sortAscending: _sortAscending,
+                          onEdit: _openForm,
+                          onDelete: _confirmDelete,
+                          loading: _loading,
+                          onLoadMore: _loadMore,
+                          hasMore: _hasMore,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:organizagrana/features/boletos/presentation/widgets/boleto_delet
 import 'package:organizagrana/features/boletos/presentation/widgets/boleto_filter_bar.dart';
 import 'package:organizagrana/features/boletos/presentation/widgets/boleto_form_dialog.dart';
 import 'package:organizagrana/features/boletos/presentation/widgets/boletos_table.dart';
+import 'package:organizagrana/shared/widgets/form/clear_filters_on_escape.dart';
 
 class BoletosPage extends StatefulWidget {
   const BoletosPage({super.key, required this.service});
@@ -17,6 +18,7 @@ class BoletosPage extends StatefulWidget {
 }
 
 class _BoletosPageState extends State<BoletosPage> {
+  final _filterBarKey = GlobalKey<BoletoFilterBarState>();
   List<Boleto> _boletos = [];
   int _total = 0;
   int _page = 1;
@@ -114,19 +116,22 @@ class _BoletosPageState extends State<BoletosPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        _buildContent(context),
-        Positioned(
-          right: 24,
-          bottom: 24,
-          child: FloatingActionButton(
-            onPressed: _openForm,
-            tooltip: 'Novo Boleto',
-            child: const Icon(Icons.add),
+    return ClearFiltersOnEscape(
+      onClear: () => _filterBarKey.currentState?.clear(),
+      child: Stack(
+        children: [
+          _buildContent(context),
+          Positioned(
+            right: 24,
+            bottom: 24,
+            child: FloatingActionButton(
+              onPressed: _openForm,
+              tooltip: 'Novo Boleto',
+              child: const Icon(Icons.add),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -156,6 +161,7 @@ class _BoletosPageState extends State<BoletosPage> {
           ),
           const SizedBox(height: 16),
           BoletoFilterBar(
+            key: _filterBarKey,
             onFilter: _onFilter,
             onPrint: () {},
           ),

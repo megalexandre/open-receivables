@@ -12,6 +12,7 @@ import 'package:organizagrana/features/connections/presentation/widgets/connecti
 import 'package:organizagrana/features/connections/presentation/widgets/connections_table.dart';
 import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
+import 'package:organizagrana/shared/widgets/form/clear_filters_on_escape.dart';
 
 class ConnectionsPage extends StatefulWidget {
   const ConnectionsPage({
@@ -32,6 +33,7 @@ class ConnectionsPage extends StatefulWidget {
 }
 
 class _ConnectionsPageState extends State<ConnectionsPage> {
+  final _filtersRowKey = GlobalKey<_FiltersRowState>();
   List<Connection> _connections = [];
   ConnectionSummary? _summary;
   List<Address> _addresses = [];
@@ -152,6 +154,14 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     _load();
   }
 
+  void _clearFilters() {
+    _filtersRowKey.currentState?.clear();
+    _memberFilter = '';
+    _addressFilter = null;
+    _activeFilter = null;
+    _applyFilters();
+  }
+
   Future<void> _openForm({Connection? connection}) async {
     final saved = await showConnectionFormDialog(
       context,
@@ -166,7 +176,8 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     if (saved) _refresh();
   }
 
-  Future<void> _onEdit(Connection connection) => _openForm(connection: connection);
+  Future<void> _onEdit(Connection connection) =>
+      _openForm(connection: connection);
 
   Future<void> _onDelete(Connection connection) async {
     final confirmed = await showConnectionDeleteDialog(context, connection);
@@ -187,82 +198,86 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ligações',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Gerencie as ligações de água.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const Spacer(),
-              FilledButton.icon(
-                onPressed: _openForm,
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Nova Ligação'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          if (_summary != null) ...[
-            ConnectionSummaryCards(summary: _summary!),
-            const SizedBox(height: 24),
-          ],
-          _FiltersRow(
-            addresses: _addresses,
-            onMemberChanged: (v) {
-              _memberFilter = v;
-              _applyFilters();
-            },
-            onAddressChanged: (v) {
-              _addressFilter = v;
-              _applyFilters();
-            },
-            onActiveChanged: (v) {
-              _activeFilter = v;
-              _applyFilters();
-            },
-          ),
-          const SizedBox(height: 16),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
+    return ClearFiltersOnEscape(
+      onClear: _clearFilters,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ligações',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Gerencie as ligações de água.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                FilledButton.icon(
+                  onPressed: _openForm,
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Nova Ligação'),
+                ),
+              ],
             ),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: ConnectionsTable(
-                  connections: _connections,
-                  total: _total,
-                  page: _page,
-                  pageSize: _pageSize,
-                  onPageChanged: _onPageChanged,
-                  onSort: _onSort,
-                  sortKey: _sortBy,
-                  sortAscending: _sortAscending,
-                  onEdit: _onEdit,
-                  onDelete: _onDelete,
-                  loading: _loading,
+            const SizedBox(height: 24),
+            if (_summary != null) ...[
+              ConnectionSummaryCards(summary: _summary!),
+              const SizedBox(height: 24),
+            ],
+            _FiltersRow(
+              key: _filtersRowKey,
+              addresses: _addresses,
+              onMemberChanged: (v) {
+                _memberFilter = v;
+                _applyFilters();
+              },
+              onAddressChanged: (v) {
+                _addressFilter = v;
+                _applyFilters();
+              },
+              onActiveChanged: (v) {
+                _activeFilter = v;
+                _applyFilters();
+              },
+            ),
+            const SizedBox(height: 16),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ConnectionsTable(
+                    connections: _connections,
+                    total: _total,
+                    page: _page,
+                    pageSize: _pageSize,
+                    onPageChanged: _onPageChanged,
+                    onSort: _onSort,
+                    sortKey: _sortBy,
+                    sortAscending: _sortAscending,
+                    onEdit: _onEdit,
+                    onDelete: _onDelete,
+                    loading: _loading,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -270,6 +285,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
 
 class _FiltersRow extends StatefulWidget {
   const _FiltersRow({
+    super.key,
     required this.addresses,
     required this.onMemberChanged,
     required this.onAddressChanged,
@@ -294,6 +310,14 @@ class _FiltersRowState extends State<_FiltersRow> {
   void dispose() {
     _memberCtrl.dispose();
     super.dispose();
+  }
+
+  void clear() {
+    setState(() {
+      _memberCtrl.clear();
+      _addressFilter = null;
+      _activeFilter = null;
+    });
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:organizagrana/features/caixa/data/caixa_service.dart';
 import 'package:organizagrana/features/caixa/domain/caixa_failure.dart';
 import 'package:organizagrana/features/caixa/domain/caixa_posting.dart';
 import 'package:organizagrana/features/caixa/presentation/widgets/caixa_table.dart';
+import 'package:organizagrana/shared/widgets/form/clear_filters_on_escape.dart';
 
 class CaixaPage extends StatefulWidget {
   const CaixaPage({super.key, required this.service});
@@ -14,6 +15,7 @@ class CaixaPage extends StatefulWidget {
 }
 
 class _CaixaPageState extends State<CaixaPage> {
+  final _filterBarKey = GlobalKey<_CaixaFilterBarState>();
   List<CaixaPosting> _postings = [];
   int _total = 0;
   double _totalValue = 0;
@@ -80,85 +82,93 @@ class _CaixaPageState extends State<CaixaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Postagens Financeiras',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Visão geral detalhada das transações diárias de recebíveis.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const Spacer(),
-              OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.tune, size: 16),
-                label: const Text('Filtros Avançados'),
-              ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.download_outlined, size: 16),
-                label: const Text('Exportar CSV'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
+    return ClearFiltersOnEscape(
+      onClear: () => _filterBarKey.currentState?.clear(),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Postagens Financeiras',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Visão geral detalhada das transações diárias de recebíveis.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.tune, size: 16),
+                  label: const Text('Filtros Avançados'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.download_outlined, size: 16),
+                  label: const Text('Exportar CSV'),
+                ),
+              ],
             ),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: CaixaTable(
-                  postings: _postings,
-                  total: _total,
-                  totalValue: _totalValue,
-                  page: _page,
-                  pageSize: _pageSize,
-                  onPageChanged: _onPageChanged,
-                  onSort: _onSort,
-                  sortKey: _sortBy,
-                  sortAscending: _sortAscending,
-                  loading: _loading,
+            const SizedBox(height: 16),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: CaixaTable(
+                    postings: _postings,
+                    total: _total,
+                    totalValue: _totalValue,
+                    page: _page,
+                    pageSize: _pageSize,
+                    onPageChanged: _onPageChanged,
+                    onSort: _onSort,
+                    sortKey: _sortBy,
+                    sortAscending: _sortAscending,
+                    loading: _loading,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _CaixaFilterBar(
-            filter: _filter,
-            onConsult: (f) {
-              setState(() {
-                _filter = f;
-                _page = 1;
-              });
-              _load();
-            },
-          ),
-        ],
+            const SizedBox(height: 16),
+            _CaixaFilterBar(
+              key: _filterBarKey,
+              filter: _filter,
+              onConsult: (f) {
+                setState(() {
+                  _filter = f;
+                  _page = 1;
+                });
+                _load();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _CaixaFilterBar extends StatefulWidget {
-  const _CaixaFilterBar({required this.filter, required this.onConsult});
+  const _CaixaFilterBar({
+    super.key,
+    required this.filter,
+    required this.onConsult,
+  });
 
   final CaixaFilter filter;
   final void Function(CaixaFilter) onConsult;
@@ -171,6 +181,15 @@ class _CaixaFilterBarState extends State<_CaixaFilterBar> {
   late DateTime? _start = widget.filter.startDate;
   late DateTime? _end = widget.filter.endDate;
   PaymentMethod? _method;
+
+  void clear() {
+    setState(() {
+      _start = DateTime(DateTime.now().year, DateTime.now().month);
+      _end = DateTime.now();
+      _method = null;
+    });
+    widget.onConsult(CaixaFilter(startDate: _start, endDate: _end));
+  }
 
   Future<void> _pickDate(bool isStart) async {
     final initial = isStart
@@ -241,11 +260,13 @@ class _CaixaFilterBarState extends State<_CaixaFilterBar> {
             ),
             const SizedBox(width: 8),
             FilledButton.icon(
-              onPressed: () => widget.onConsult(CaixaFilter(
-                startDate: _start,
-                endDate: _end,
-                paymentMethod: _method,
-              )),
+              onPressed: () => widget.onConsult(
+                CaixaFilter(
+                  startDate: _start,
+                  endDate: _end,
+                  paymentMethod: _method,
+                ),
+              ),
               icon: const Icon(Icons.search, size: 16),
               label: const Text('Consultar'),
             ),

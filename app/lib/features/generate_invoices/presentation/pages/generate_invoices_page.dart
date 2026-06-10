@@ -6,6 +6,7 @@ import 'package:organizagrana/features/generate_invoices/data/generate_invoices_
 import 'package:organizagrana/features/generate_invoices/domain/generate_invoices_failure.dart';
 import 'package:organizagrana/features/generate_invoices/domain/invoice_candidate.dart';
 import 'package:organizagrana/features/generate_invoices/presentation/widgets/invoice_candidates_table.dart';
+import 'package:organizagrana/shared/widgets/form/clear_filters_on_escape.dart';
 
 class GenerateInvoicesPage extends StatefulWidget {
   const GenerateInvoicesPage({
@@ -22,6 +23,7 @@ class GenerateInvoicesPage extends StatefulWidget {
 }
 
 class _GenerateInvoicesPageState extends State<GenerateInvoicesPage> {
+  final _filterBarKey = GlobalKey<_FilterBarState>();
   List<InvoiceCandidate> _candidates = [];
   int _total = 0;
   double _totalValue = 0;
@@ -37,7 +39,12 @@ class _GenerateInvoicesPageState extends State<GenerateInvoicesPage> {
 
   DateTime? _dueDate;
 
-  static const _meterTypes = ['Todos', 'Residencial', 'Comercial', 'Industrial'];
+  static const _meterTypes = [
+    'Todos',
+    'Residencial',
+    'Comercial',
+    'Industrial',
+  ];
 
   @override
   void initState() {
@@ -89,14 +96,18 @@ class _GenerateInvoicesPageState extends State<GenerateInvoicesPage> {
       return;
     }
     try {
-      await widget.service.generate(GenerateInvoicesRequest(
-        candidateIds: _selected.toList(),
-        dueDate: DateFormat('yyyy-MM-dd').format(_dueDate!),
-      ));
+      await widget.service.generate(
+        GenerateInvoicesRequest(
+          candidateIds: _selected.toList(),
+          dueDate: DateFormat('yyyy-MM-dd').format(_dueDate!),
+        ),
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${_selected.length} fatura(s) gerada(s) com sucesso.'),
+            content: Text(
+              '${_selected.length} fatura(s) gerada(s) com sucesso.',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -108,9 +119,9 @@ class _GenerateInvoicesPageState extends State<GenerateInvoicesPage> {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.red),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
 
   void _toggleAll(bool value) {
@@ -135,70 +146,75 @@ class _GenerateInvoicesPageState extends State<GenerateInvoicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gerar Faturas',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Processamento e emissão de cobranças em lote.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _FilterBar(
-            addresses: _addresses,
-            meterTypes: _meterTypes,
-            initialFilter: _filter,
-            onSearch: (f) {
-              setState(() => _filter = f);
-              _load();
-            },
-          ),
-          const SizedBox(height: 16),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
+    return ClearFiltersOnEscape(
+      onClear: () => _filterBarKey.currentState?.clear(),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Gerar Faturas',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Processamento e emissão de cobranças em lote.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ],
             ),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: InvoiceCandidatesTable(
-                  candidates: _candidates,
-                  selected: _selected,
-                  onToggle: _toggle,
-                  onToggleAll: _toggleAll,
-                  loading: _loading,
+            const SizedBox(height: 16),
+            _FilterBar(
+              key: _filterBarKey,
+              addresses: _addresses,
+              meterTypes: _meterTypes,
+              initialFilter: _filter,
+              onSearch: (f) {
+                setState(() => _filter = f);
+                _load();
+              },
+            ),
+            const SizedBox(height: 16),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: InvoiceCandidatesTable(
+                    candidates: _candidates,
+                    selected: _selected,
+                    onToggle: _toggle,
+                    onToggleAll: _toggleAll,
+                    loading: _loading,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _Footer(
-            total: _total,
-            totalValue: _totalValue,
-            selectedCount: _selected.length,
-            dueDate: _dueDate,
-            onDueDateChanged: (d) => setState(() => _dueDate = d),
-            onToggleAll: () => _toggleAll(_selected.length != _candidates.length),
-            onConfirm: _confirmGenerate,
-          ),
-        ],
+            const SizedBox(height: 12),
+            _Footer(
+              total: _total,
+              totalValue: _totalValue,
+              selectedCount: _selected.length,
+              dueDate: _dueDate,
+              onDueDateChanged: (d) => setState(() => _dueDate = d),
+              onToggleAll: () =>
+                  _toggleAll(_selected.length != _candidates.length),
+              onConfirm: _confirmGenerate,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -206,6 +222,7 @@ class _GenerateInvoicesPageState extends State<GenerateInvoicesPage> {
 
 class _FilterBar extends StatefulWidget {
   const _FilterBar({
+    super.key,
     required this.addresses,
     required this.meterTypes,
     required this.initialFilter,
@@ -223,8 +240,25 @@ class _FilterBar extends StatefulWidget {
 
 class _FilterBarState extends State<_FilterBar> {
   late String _meterType = widget.meterTypes.first;
-  late String _competencia = widget.initialFilter.competencia ?? '';
+  late final _competenciaCtrl = TextEditingController(
+    text: widget.initialFilter.competencia ?? '',
+  );
   String? _addressId;
+
+  @override
+  void dispose() {
+    _competenciaCtrl.dispose();
+    super.dispose();
+  }
+
+  void clear() {
+    setState(() {
+      _meterType = widget.meterTypes.first;
+      _competenciaCtrl.clear();
+      _addressId = null;
+    });
+    widget.onSearch(const InvoiceCandidateFilter());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -251,13 +285,12 @@ class _FilterBarState extends State<_FilterBar> {
             SizedBox(
               width: 120,
               child: TextFormField(
-                initialValue: _competencia,
+                controller: _competenciaCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Competência',
                   isDense: true,
                   hintText: 'MM/AAAA',
                 ),
-                onChanged: (v) => _competencia = v,
               ),
             ),
             const SizedBox(width: 12),
@@ -282,26 +315,18 @@ class _FilterBarState extends State<_FilterBar> {
             ),
             const SizedBox(width: 12),
             FilledButton.icon(
-              onPressed: () => widget.onSearch(InvoiceCandidateFilter(
-                meterType: _meterType,
-                competencia: _competencia,
-                addressId: _addressId,
-              )),
+              onPressed: () => widget.onSearch(
+                InvoiceCandidateFilter(
+                  meterType: _meterType,
+                  competencia: _competenciaCtrl.text,
+                  addressId: _addressId,
+                ),
+              ),
               icon: const Icon(Icons.search, size: 16),
               label: const Text('Buscar'),
             ),
             const SizedBox(width: 8),
-            OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  _meterType = widget.meterTypes.first;
-                  _competencia = '';
-                  _addressId = null;
-                });
-                widget.onSearch(const InvoiceCandidateFilter());
-              },
-              child: const Text('Limpar'),
-            ),
+            OutlinedButton(onPressed: clear, child: const Text('Limpar')),
           ],
         ),
       ),
@@ -342,8 +367,11 @@ class _Footer extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            Icon(Icons.info_outline,
-                size: 16, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 8),
             Text(
               '$total faturas encontradas, valor total: $_totalFormatted',

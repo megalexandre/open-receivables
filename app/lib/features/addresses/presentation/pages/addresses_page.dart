@@ -6,6 +6,7 @@ import 'package:organizagrana/features/addresses/presentation/widgets/address_de
 import 'package:organizagrana/features/addresses/presentation/widgets/address_filter_bar.dart';
 import 'package:organizagrana/features/addresses/presentation/widgets/address_form_dialog.dart';
 import 'package:organizagrana/features/addresses/presentation/widgets/addresses_table.dart';
+import 'package:organizagrana/shared/widgets/form/clear_filters_on_escape.dart';
 
 class AddressesPage extends StatefulWidget {
   const AddressesPage({super.key, required this.service});
@@ -17,6 +18,7 @@ class AddressesPage extends StatefulWidget {
 }
 
 class _AddressesPageState extends State<AddressesPage> {
+  final _filterBarKey = GlobalKey<AddressFilterBarState>();
   List<Address> _addresses = [];
   int _total = 0;
   int _page = 1;
@@ -100,18 +102,18 @@ class _AddressesPageState extends State<AddressesPage> {
   }
 
   Future<void> _openForm([Address? address]) async {
-    final result = await AddressFormDialog.show(context, address);
-    if (result == null) return;
-    try {
-      if (address == null) {
-        await widget.service.create(result);
-      } else {
-        await widget.service.update(result);
-      }
-      _refresh();
-    } on AddressFailure catch (e) {
-      if (mounted) _showError(e.message);
-    }
+    final saved = await showAddressFormDialog(
+      context,
+      address: address,
+      onSave: (result) async {
+        if (address == null) {
+          await widget.service.create(result);
+        } else {
+          await widget.service.update(result);
+        }
+      },
+    );
+    if (saved) _refresh();
   }
 
   Future<void> _confirmDelete(Address address) async {
@@ -133,68 +135,71 @@ class _AddressesPageState extends State<AddressesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Logradouros',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Gerencie os endereços cadastrados.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const Spacer(),
-              FilledButton.icon(
-                onPressed: () => _openForm(),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Novo Endereço'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
-            ),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+    return ClearFiltersOnEscape(
+      onClear: () => _filterBarKey.currentState?.clear(),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AddressFilterBar(onFilter: _onFilter),
-                    Expanded(
-                      child: AddressesTable(
-                        addresses: _addresses,
-                        onSort: _onSort,
-                        sortKey: _sortBy,
-                        sortAscending: _sortAscending,
-                        onEdit: _openForm,
-                        onDelete: _confirmDelete,
-                        loading: _loading,
-                        onLoadMore: _loadMore,
-                        hasMore: _hasMore,
-                      ),
+                    Text(
+                      'Logradouros',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Gerencie os endereços cadastrados.',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
+                const Spacer(),
+                FilledButton.icon(
+                  onPressed: () => _openForm(),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Novo Endereço'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AddressFilterBar(key: _filterBarKey, onFilter: _onFilter),
+                      Expanded(
+                        child: AddressesTable(
+                          addresses: _addresses,
+                          onSort: _onSort,
+                          sortKey: _sortBy,
+                          sortAscending: _sortAscending,
+                          onEdit: _openForm,
+                          onDelete: _confirmDelete,
+                          loading: _loading,
+                          onLoadMore: _loadMore,
+                          hasMore: _hasMore,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

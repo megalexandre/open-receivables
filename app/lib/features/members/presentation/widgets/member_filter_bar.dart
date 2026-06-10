@@ -6,10 +6,10 @@ class MemberFilterBar extends StatefulWidget {
   final void Function({String? name, String? document, bool? active}) onFilter;
 
   @override
-  State<MemberFilterBar> createState() => _MemberFilterBarState();
+  State<MemberFilterBar> createState() => MemberFilterBarState();
 }
 
-class _MemberFilterBarState extends State<MemberFilterBar> {
+class MemberFilterBarState extends State<MemberFilterBar> {
   final _nameCtrl = TextEditingController();
   final _documentCtrl = TextEditingController();
   bool? _active;
@@ -25,12 +25,14 @@ class _MemberFilterBarState extends State<MemberFilterBar> {
     final name = _nameCtrl.text.trim();
     widget.onFilter(
       name: name.length >= 4 ? name : null,
-      document: _documentCtrl.text.trim().isEmpty ? null : _documentCtrl.text.trim(),
+      document: _documentCtrl.text.trim().isEmpty
+          ? null
+          : _documentCtrl.text.trim(),
       active: _active,
     );
   }
 
-  void _clear() {
+  void clear() {
     setState(() {
       _nameCtrl.clear();
       _documentCtrl.clear();
@@ -40,7 +42,9 @@ class _MemberFilterBarState extends State<MemberFilterBar> {
   }
 
   bool get _hasFilters =>
-      _nameCtrl.text.isNotEmpty || _documentCtrl.text.isNotEmpty || _active != null;
+      _nameCtrl.text.isNotEmpty ||
+      _documentCtrl.text.isNotEmpty ||
+      _active != null;
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +79,7 @@ class _MemberFilterBarState extends State<MemberFilterBar> {
           ),
           const Spacer(),
           if (_hasFilters)
-            TextButton(
-              onPressed: _clear,
-              child: const Text('Limpar'),
-            ),
+            TextButton(onPressed: clear, child: const Text('Limpar')),
           const SizedBox(width: 8),
           FilledButton.icon(
             onPressed: _notify,
