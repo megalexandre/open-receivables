@@ -49,54 +49,42 @@ class _MemberFilterBarState extends State<MemberFilterBar> {
       child: Row(
         children: [
           SizedBox(
-            width: 220,
+            width: 300,
             child: TextField(
               controller: _nameCtrl,
               decoration: const InputDecoration(
-                hintText: 'Buscar por nome...',
+                hintText: 'Nome...',
                 isDense: true,
                 prefixIcon: Icon(Icons.search, size: 16),
               ),
-              onChanged: (_) => _notify(),
+              onSubmitted: (_) => _notify(),
             ),
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: 180,
+            width: 250,
             child: TextField(
               controller: _documentCtrl,
               decoration: const InputDecoration(
-                hintText: 'Buscar por documento...',
+                hintText: 'Documento...',
                 isDense: true,
                 prefixIcon: Icon(Icons.badge_outlined, size: 16),
               ),
-              onChanged: (_) => _notify(),
+              onSubmitted: (_) => _notify(),
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 140,
-            child: DropdownButtonFormField<bool?>(
-              initialValue: _active,
-              hint: const Text('Status'),
-              decoration: const InputDecoration(isDense: true),
-              items: const [
-                DropdownMenuItem(child: Text('Todos')),
-                DropdownMenuItem(value: true, child: Text('Ativos')),
-                DropdownMenuItem(value: false, child: Text('Inativos')),
-              ],
-              onChanged: (v) {
-                setState(() => _active = v);
-                _notify();
-              },
-            ),
-          ),
-          const SizedBox(width: 8),
+          const Spacer(),
           if (_hasFilters)
             TextButton(
               onPressed: _clear,
               child: const Text('Limpar'),
             ),
+          const SizedBox(width: 8),
+          FilledButton.icon(
+            onPressed: _notify,
+            icon: const Icon(Icons.search, size: 16),
+            label: const Text('Consultar'),
+          ),
         ],
       ),
     );

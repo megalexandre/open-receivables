@@ -46,8 +46,8 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
     final m = widget.member;
     _nameCtrl = TextEditingController(text: m?.name ?? '');
     _documentCtrl = TextEditingController(text: m?.document ?? '');
-    _memberNumberCtrl = TextEditingController(text: m?.memberNumber?.toString() ?? '');
-    _voter = m?.voter ?? false;
+    _memberNumberCtrl = TextEditingController(text: m?.memberNumber?.toString() ?? '0');
+    _voter = m?.voter ?? true;
   }
 
   @override

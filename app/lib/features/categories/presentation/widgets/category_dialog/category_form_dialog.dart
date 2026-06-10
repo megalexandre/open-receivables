@@ -145,7 +145,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             TextFormField(
               controller: _nameCtrl,
               decoration: const InputDecoration(
-                hintText: 'Ex: Residencial A',
+                hintText: '',
                 isDense: true,
               ),
               validator: (v) =>
