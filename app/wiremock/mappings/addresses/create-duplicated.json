@@ -1,0 +1,19 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/addresses",
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.name", "equalTo": "Duplicada" } }
+    ]
+  },
+  "response": {
+    "status": 422,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "errors": [
+        { "code": "E_ADDRESS_DUPLICATED", "field": "name" }
+      ]
+    }
+  }
+}

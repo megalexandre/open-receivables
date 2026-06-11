@@ -45,7 +45,9 @@ jobs:
           xvfb-run --auto-servernum flutter test integration_test/features/auth/auth_test.dart -d linux
           xvfb-run --auto-servernum flutter test integration_test/features/categories/categories_test.dart -d linux
           xvfb-run --auto-servernum flutter test integration_test/features/members/members_test.dart -d linux
-          xvfb-run --auto-servernum flutter test integration_test/features/addresses/addresses_test.dart -d linux
+          xvfb-run --auto-servernum flutter test integration_test/features/addresses/list_test.dart -d linux
+          xvfb-run --auto-servernum flutter test integration_test/features/addresses/save_test.dart -d linux
+          xvfb-run --auto-servernum flutter test integration_test/features/addresses/delete_test.dart -d linux
           xvfb-run --auto-servernum flutter test integration_test/features/boletos/boletos_test.dart -d linux
 
       - name: Stop WireMock

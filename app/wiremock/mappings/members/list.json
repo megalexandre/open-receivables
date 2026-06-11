@@ -1,24 +1,18 @@
 {
-  "request": {
-    "method": "GET",
-    "urlPath": "/members"
-  },
+  "priority": 5,
+  "request": { "method": "GET", "urlPath": "/members" },
   "response": {
     "status": 200,
-    "headers": {
-      "Content-Type": "application/json"
-    },
+    "headers": { "Content-Type": "application/json" },
     "jsonBody": {
       "data": [
-        { "id": "mem-1", "member_number": "#10294", "name": "Ricardo Mendonça", "document": "123.456.789-00", "active": true },
-        { "id": "mem-2", "member_number": "#10301", "name": "Ana Souza", "document": "987.654.321-11", "active": true },
-        { "id": "mem-3", "member_number": "#10442", "name": "Fernando Batista", "document": "456.123.789-55", "active": false },
-        { "id": "mem-4", "member_number": "#10512", "name": "Carla Peixoto", "document": "789.456.123-88", "active": true },
-        { "id": "mem-5", "member_number": "#10599", "name": "Juliana Oliveira", "document": "222.333.444-55", "active": true }
+        { "id": 1, "member_number": 10294, "name": "Ricardo Mendonça",  "document": "12345678900", "voter": true,  "active": true },
+        { "id": 2, "member_number": 10301, "name": "Ana Souza",         "document": "98765432111", "voter": false, "active": true },
+        { "id": 3, "member_number": 10442, "name": "Fernando Batista",  "document": "45612378955", "voter": true,  "active": true },
+        { "id": 4, "member_number": 10512, "name": "Carla Peixoto",     "document": "78945612388", "voter": false, "active": true },
+        { "id": 5, "member_number": 10599, "name": "Juliana Oliveira",  "document": "22233344455", "voter": true,  "active": true }
       ],
-      "total": 1284,
-      "page": 1,
-      "pageSize": 5
+      "pagination": { "current_page": 1, "total_pages": 1, "total_count": 5, "per_page": 20, "total": 5 }
     }
   }
 }

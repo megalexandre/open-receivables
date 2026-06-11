@@ -114,8 +114,20 @@ class _MembersPageState extends State<MembersPage> {
           await widget.service.update(result);
         }
       },
+      onReactivate: (result) async {
+        await widget.service.reactivate(result.id);
+      },
     );
     if (saved) _refresh();
+  }
+
+  Future<void> _reactivate(Member member) async {
+    try {
+      await widget.service.reactivate(member.id);
+      _refresh();
+    } on MemberFailure catch (e) {
+      if (mounted) _showError(e.message);
+    }
   }
 
   Future<void> _confirmDelete(Member member) async {
@@ -190,6 +202,7 @@ class _MembersPageState extends State<MembersPage> {
                           sortAscending: _sortAscending,
                           onEdit: _openForm,
                           onDelete: _confirmDelete,
+                          onReactivate: _reactivate,
                           loading: _loading,
                           onLoadMore: _loadMore,
                           hasMore: _hasMore,

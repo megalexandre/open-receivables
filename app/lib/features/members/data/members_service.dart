@@ -87,4 +87,13 @@ class MembersService {
       throw MemberFailure(e.type);
     }
   }
+
+  Future<Member> reactivate(String id) async {
+    try {
+      final json = await _apiClient.reactivate(id);
+      return Member.fromJson(json);
+    } on AppFailure catch (e) {
+      throw MemberFailure(e.type);
+    }
+  }
 }

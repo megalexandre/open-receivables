@@ -1,0 +1,28 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "GET",
+    "urlPath": "/addresses",
+    "queryParameters": {
+      "sort_by": { "equalTo": "name" },
+      "sort_order": { "equalTo": "asc" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": 2, "address_type": "Avenida",  "name": "Brasil",            "notes": "Via principal" },
+        { "id": 8, "address_type": "Vila",     "name": "Esperança",         "notes": null },
+        { "id": 7, "address_type": "Travessa", "name": "Maranhão",          "notes": null },
+        { "id": 4, "address_type": "Praça",    "name": "Matriz",            "notes": null },
+        { "id": 3, "address_type": "Avenida",  "name": "Principal",         "notes": null },
+        { "id": 1, "address_type": "Alameda",  "name": "Santos",            "notes": null },
+        { "id": 6, "address_type": "Rua",      "name": "Sete de Setembro",  "notes": null },
+        { "id": 5, "address_type": "Rua",      "name": "das Flores",        "notes": "Próximo à praça" }
+      ],
+      "pagination": { "current_page": 1, "total_pages": 1, "total_count": 8, "per_page": 20, "total": 8 }
+    }
+  }
+}

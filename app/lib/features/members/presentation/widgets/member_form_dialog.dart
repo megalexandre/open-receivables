@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
+import 'package:organizagrana/features/members/domain/member_failure.dart';
 import 'package:organizagrana/shared/errors/api_error_code.dart';
 import 'package:organizagrana/shared/utils/document_input_formatter.dart';
 import 'package:organizagrana/shared/widgets/overlay/app_dialog.dart';
@@ -11,19 +12,30 @@ Future<bool> showMemberFormDialog(
   BuildContext context, {
   Member? member,
   required MemberSaveCallback onSave,
+  MemberSaveCallback? onReactivate,
 }) async {
   final saved = await showAppDialog<bool>(
     context: context,
-    builder: (_) => MemberFormDialog(member: member, onSave: onSave),
+    builder: (_) => MemberFormDialog(
+      member: member,
+      onSave: onSave,
+      onReactivate: onReactivate,
+    ),
   );
   return saved ?? false;
 }
 
 class MemberFormDialog extends StatefulWidget {
-  const MemberFormDialog({super.key, this.member, required this.onSave});
+  const MemberFormDialog({
+    super.key,
+    this.member,
+    required this.onSave,
+    this.onReactivate,
+  });
 
   final Member? member;
   final MemberSaveCallback onSave;
+  final MemberSaveCallback? onReactivate;
 
   @override
   State<MemberFormDialog> createState() => _MemberFormDialogState();
@@ -39,6 +51,8 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
   bool _voter = false;
   bool _saving = false;
   String? _apiError;
+
+  bool get _isInactive => widget.member?.active == false;
 
   @override
   void initState() {
@@ -87,6 +101,25 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
     }
   }
 
+  Future<void> _reactivate() async {
+    setState(() {
+      _saving = true;
+      _apiError = null;
+    });
+
+    try {
+      await widget.onReactivate!(widget.member!);
+      if (mounted) Navigator.of(context).pop(true);
+    } on MemberFailure catch (e) {
+      setState(() {
+        _saving = false;
+        _apiError = e.message;
+      });
+    } catch (_) {
+      if (mounted) Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -115,9 +148,25 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
               ),
               const SizedBox(height: 12),
             ],
+            if (_isInactive) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  border: Border.all(color: colorScheme.outline),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Sócio inativo. Reative para poder editar.',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             const _Label('Nome Completo'),
             TextFormField(
               controller: _nameCtrl,
+              enabled: !_isInactive,
               decoration: const InputDecoration(
                 hintText: 'Digite o nome do sócio',
                 isDense: true,
@@ -135,6 +184,7 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
                       const _Label('Documento (CPF/CNPJ)'),
                       TextFormField(
                         controller: _documentCtrl,
+                        enabled: !_isInactive,
                         decoration: const InputDecoration(
                           hintText: '000.000.000-00',
                           isDense: true,
@@ -159,6 +209,7 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
                       const _Label('Número de Sócio'),
                       TextFormField(
                         controller: _memberNumberCtrl,
+                        enabled: !_isInactive,
                         decoration: const InputDecoration(
                           hintText: 'Ex: 2024-001',
                           isDense: true,
@@ -175,7 +226,7 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
             const SizedBox(height: 4),
             SwitchListTile(
               value: _voter,
-              onChanged: (v) => setState(() => _voter = v),
+              onChanged: _isInactive ? null : (v) => setState(() => _voter = v),
               title: const Text('É Votante'),
               contentPadding: EdgeInsets.zero,
               dense: true,
@@ -189,15 +240,15 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
           child: const Text('Cancelar'),
         ),
         FilledButton.icon(
-          onPressed: _saving ? null : _submit,
+          onPressed: _saving ? null : (_isInactive ? _reactivate : _submit),
           icon: _saving
               ? const SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.save_outlined, size: 16),
-          label: const Text('Salvar'),
+              : Icon(_isInactive ? Icons.restore : Icons.save_outlined, size: 16),
+          label: Text(_isInactive ? 'Reativar' : 'Salvar'),
         ),
       ],
     );

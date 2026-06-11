@@ -16,6 +16,7 @@ abstract class MembersApiClient {
   Future<Map<String, dynamic>> create(Member member);
   Future<Map<String, dynamic>> update(Member member);
   Future<void> delete(String id);
+  Future<Map<String, dynamic>> reactivate(String id);
 }
 
 
@@ -66,5 +67,13 @@ class HttpMembersApiClient extends BaseHttpResourceClient
   @override
   Future<void> delete(String id) => callVoid(
         () => httpClient.deleteVoid(Uri.parse(ApiEndpoints.members.byId(id))),
+      );
+
+  @override
+  Future<Map<String, dynamic>> reactivate(String id) => call(
+        () => httpClient.patchJson(
+          Uri.parse(ApiEndpoints.members.reactivate(id)),
+          const {},
+        ),
       );
 }

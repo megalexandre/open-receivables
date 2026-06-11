@@ -1,8 +1,9 @@
 {
-  "request": { "method": "PUT", "urlPathPattern": "/addresses/.*" },
+  "priority": 5,
+  "request": { "method": "PUT", "urlPathPattern": "/addresses/[0-9]+" },
   "response": {
     "status": 200,
     "headers": { "Content-Type": "application/json" },
-    "jsonBody": { "id": "addr-1", "type": "Rua", "name": "Endereço Atualizado", "base_cep": "04578-000" }
+    "body": "{\"id\": {{request.pathSegments.[1]}}, \"address_type\": \"{{jsonPath request.body '$.address_type'}}\", \"name\": \"{{jsonPath request.body '$.name'}}\", \"notes\": null}"
   }
 }

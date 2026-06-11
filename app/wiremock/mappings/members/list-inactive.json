@@ -1,0 +1,20 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "GET",
+    "urlPath": "/members",
+    "queryParameters": {
+      "active": { "equalTo": "false" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": 9, "member_number": 10100, "name": "Sócio Desligado", "document": "11122233344", "voter": false, "active": false }
+      ],
+      "pagination": { "current_page": 1, "total_pages": 1, "total_count": 1, "per_page": 20, "total": 1 }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "GET",
+    "urlPath": "/addresses",
+    "queryParameters": {
+      "name": { "equalTo": "ERRO500" }
+    }
+  },
+  "response": {
+    "status": 500,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "error": "Internal Server Error" }
+  }
+}

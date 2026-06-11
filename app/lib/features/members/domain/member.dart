@@ -5,6 +5,7 @@ class Member {
     required this.document,
     this.memberNumber,
     this.voter = false,
+    this.active = true,
   });
 
   final String id;
@@ -12,6 +13,7 @@ class Member {
   final String document;
   final int? memberNumber;
   final bool voter;
+  final bool active;
 
   factory Member.fromJson(Map<String, dynamic> json) => Member(
         id: json['id'].toString(),
@@ -19,6 +21,7 @@ class Member {
         document: json['document'] as String,
         memberNumber: (json['member_number'] as num?)?.toInt(),
         voter: json['voter'] as bool? ?? false,
+        active: json['active'] as bool? ?? true,
       );
 
   Map<String, dynamic> toJson() => {
@@ -35,6 +38,7 @@ class Member {
     String? document,
     int? memberNumber,
     bool? voter,
+    bool? active,
   }) =>
       Member(
         id: id ?? this.id,
@@ -42,5 +46,6 @@ class Member {
         document: document ?? this.document,
         memberNumber: memberNumber ?? this.memberNumber,
         voter: voter ?? this.voter,
+        active: active ?? this.active,
       );
 }

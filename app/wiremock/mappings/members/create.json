@@ -5,14 +5,13 @@
   },
   "response": {
     "status": 201,
-    "headers": {
-      "Content-Type": "application/json"
-    },
+    "headers": { "Content-Type": "application/json" },
     "jsonBody": {
-      "id": "mem-new",
-      "member_number": "#10600",
+      "id": 6,
+      "member_number": 10600,
       "name": "Novo Sócio",
-      "document": "000.000.000-00",
+      "document": "00000000000",
+      "voter": false,
       "active": true
     }
   }

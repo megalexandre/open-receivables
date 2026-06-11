@@ -1,0 +1,19 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "PATCH",
+    "urlPathPattern": "/members/[^/]+/reactivate"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "id": 9,
+      "member_number": 10100,
+      "name": "Sócio Desligado",
+      "document": "11122233344",
+      "voter": false,
+      "active": true
+    }
+  }
+}

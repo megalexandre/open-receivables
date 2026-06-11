@@ -5,11 +5,11 @@ import 'package:organizagrana/features/members/domain/member.dart';
 typedef ErrorParams = Map<String, String?>;
 
 enum ApiErrorCode {
-  categoryNameDuplicated('E_1_1', _categoryNameDuplicated),
-  categoryMemberTypeRequired('E_1_2', _categoryMemberTypeRequired),
-  categoryMemberTypeInvalid('E_1_3', _categoryMemberTypeInvalid),
-  memberDocumentDuplicated('E_2_1', _memberDocumentDuplicated),
-  addressDuplicated('E_3_1', _addressDuplicated),
+  categoryNameDuplicated('E_CATEGORY_DUPLICATED', _categoryNameDuplicated),
+  categoryMemberTypeRequired('E_CATEGORY_REQUIRED', _categoryMemberTypeRequired),
+  categoryMemberTypeInvalid('E_CATEGORY_INVALID', _categoryMemberTypeInvalid),
+  memberDocumentDuplicated('E_MEMBER_DUPLICATED', _memberDocumentDuplicated),
+  addressDuplicated('E_ADDRESS_DUPLICATED', _addressDuplicated),
   unknown('', _unknownMessage);
 
   const ApiErrorCode(this.code, this._messageFn);

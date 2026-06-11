@@ -1,0 +1,21 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "GET",
+    "urlPath": "/addresses",
+    "queryParameters": {
+      "address_type": { "equalTo": "Avenida" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "data": [
+        { "id": 2, "address_type": "Avenida", "name": "Brasil",    "notes": "Via principal" },
+        { "id": 3, "address_type": "Avenida", "name": "Principal", "notes": null }
+      ],
+      "pagination": { "current_page": 1, "total_pages": 1, "total_count": 2, "per_page": 20, "total": 2 }
+    }
+  }
+}

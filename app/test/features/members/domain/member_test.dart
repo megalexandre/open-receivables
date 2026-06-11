@@ -45,6 +45,16 @@ void main() {
       expect(m.voter, false);
     });
 
+    test('active assume true quando ausente', () {
+      final m = Member.fromJson(_json);
+      expect(m.active, true);
+    });
+
+    test('active false é mapeado', () {
+      final m = Member.fromJson({..._json, 'active': false});
+      expect(m.active, false);
+    });
+
     test('memberNumber como num é convertido para int', () {
       final m = Member.fromJson({..._json, 'member_number': 3.0});
       expect(m.memberNumber, 3);
@@ -90,12 +100,14 @@ void main() {
         document: '98765432100',
         memberNumber: 99,
         voter: false,
+        active: false,
       );
       expect(m.id, 'novo-id');
       expect(m.name, 'Outro');
       expect(m.document, '98765432100');
       expect(m.memberNumber, 99);
       expect(m.voter, false);
+      expect(m.active, false);
     });
   });
 }

@@ -119,4 +119,106 @@ void main() {
       expect(find.textContaining('Exibindo'), findsOneWidget);
     });
   });
+
+  group('Sócios — inativos', () {
+    Future<void> filterByInactive(WidgetTester tester) async {
+      await tester.tap(find.byType(DropdownButtonFormField<bool>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Inativos').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Consultar'));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }
+
+    testWidgets('filtrar por inativos exibe os sócios deletados', (tester) async {
+      await pumpAuthenticated(tester, fakeJwt());
+      await goToMembers(tester);
+
+      await filterByInactive(tester);
+
+      expect(find.text('Sócio Desligado'), findsOneWidget);
+      expect(find.text('Ricardo Mendonça'), findsNothing);
+    });
+
+    testWidgets('sócio inativo exibe reativar e visualizar, sem excluir',
+        (tester) async {
+      await pumpAuthenticated(tester, fakeJwt());
+      await goToMembers(tester);
+
+      await filterByInactive(tester);
+
+      expect(find.byIcon(Icons.restore), findsOneWidget);
+      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline), findsNothing);
+    });
+
+    testWidgets('abrir sócio inativo exibe campos bloqueados e botão Reativar',
+        (tester) async {
+      await pumpAuthenticated(tester, fakeJwt());
+      await goToMembers(tester);
+
+      await filterByInactive(tester);
+
+      final editIcon = find.byIcon(Icons.edit_outlined).first;
+      await tester.ensureVisible(editIcon);
+      await tester.tap(editIcon);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reativar'), findsOneWidget);
+      expect(find.text('Salvar'), findsNothing);
+      expect(
+        find.text('Sócio inativo. Reative para poder editar.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Reativar no dialog fecha e refaz a consulta', (tester) async {
+      await pumpAuthenticated(tester, fakeJwt());
+      await goToMembers(tester);
+
+      await filterByInactive(tester);
+
+      final editIcon = find.byIcon(Icons.edit_outlined).first;
+      await tester.ensureVisible(editIcon);
+      await tester.tap(editIcon);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Reativar'));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      expect(find.text('Salvar'), findsNothing);
+      expect(find.text('Reativar'), findsNothing);
+      expect(find.textContaining('Exibindo'), findsOneWidget);
+    });
+
+    testWidgets('reativar refaz a consulta sem exibir erro', (tester) async {
+      await pumpAuthenticated(tester, fakeJwt());
+      await goToMembers(tester);
+
+      await filterByInactive(tester);
+
+      final restoreIcon = find.byIcon(Icons.restore).first;
+      await tester.ensureVisible(restoreIcon);
+      await tester.tap(restoreIcon);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      expect(find.textContaining('Exibindo'), findsOneWidget);
+      expect(find.text('Sócio não encontrado.'), findsNothing);
+      expect(find.text('Falha no servidor.'), findsNothing);
+    });
+
+    testWidgets('limpar filtros restaura a lista de ativos', (tester) async {
+      await pumpAuthenticated(tester, fakeJwt());
+      await goToMembers(tester);
+
+      await filterByInactive(tester);
+      expect(find.text('Ricardo Mendonça'), findsNothing);
+
+      await tester.tap(find.text('Limpar'));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      expect(find.text('Ricardo Mendonça'), findsOneWidget);
+      expect(find.text('Sócio Desligado'), findsNothing);
+    });
+  });
 }

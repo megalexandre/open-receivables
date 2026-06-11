@@ -1,18 +1,17 @@
 {
   "request": {
     "method": "PUT",
-    "urlPathPattern": "/members/.*"
+    "urlPathPattern": "/members/[^/]+"
   },
   "response": {
     "status": 200,
-    "headers": {
-      "Content-Type": "application/json"
-    },
+    "headers": { "Content-Type": "application/json" },
     "jsonBody": {
-      "id": "mem-1",
-      "member_number": "#10294",
+      "id": 1,
+      "member_number": 10294,
       "name": "Sócio Atualizado",
-      "document": "123.456.789-00",
+      "document": "12345678900",
+      "voter": true,
       "active": true
     }
   }

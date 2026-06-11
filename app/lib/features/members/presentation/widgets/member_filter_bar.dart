@@ -77,6 +77,20 @@ class MemberFilterBarState extends State<MemberFilterBar> {
               onSubmitted: (_) => _notify(),
             ),
           ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 160,
+            child: DropdownButtonFormField<bool>(
+              initialValue: _active,
+              hint: const Text('Situação'),
+              decoration: const InputDecoration(isDense: true),
+              items: const [
+                DropdownMenuItem(child: Text('Ativos')),
+                DropdownMenuItem(value: false, child: Text('Inativos')),
+              ],
+              onChanged: (v) => setState(() => _active = v),
+            ),
+          ),
           const Spacer(),
           if (_hasFilters)
             TextButton(onPressed: clear, child: const Text('Limpar')),

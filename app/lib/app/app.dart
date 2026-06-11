@@ -43,6 +43,13 @@ class _MainAppState extends State<MainApp> {
         valueListenable: _themeController,
         builder: (_, themeMode, _) => MaterialApp.router(
           routerConfig: _appRouter.router,
+          builder: (_, child) => Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (_) => SelectionArea(child: child!),
+              ),
+            ],
+          ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           theme: AppTheme.light,
