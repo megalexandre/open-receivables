@@ -8,7 +8,6 @@ import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/features/connections/domain/connection_failure.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connection_delete_dialog.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connection_form_dialog.dart';
-import 'package:organizagrana/features/connections/presentation/widgets/connection_summary_cards.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connections_table.dart';
 import 'package:organizagrana/features/members/data/members_service.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
@@ -35,7 +34,6 @@ class ConnectionsPage extends StatefulWidget {
 class _ConnectionsPageState extends State<ConnectionsPage> {
   final _filtersRowKey = GlobalKey<_FiltersRowState>();
   List<Connection> _connections = [];
-  ConnectionSummary? _summary;
   List<Address> _addresses = [];
   List<Member> _members = [];
   List<Category> _categories = [];
@@ -55,7 +53,6 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   void initState() {
     super.initState();
     _load();
-    _loadSummary();
     _loadAddresses();
     _loadMembers();
     _loadCategories();
@@ -99,15 +96,6 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     }
   }
 
-  Future<void> _loadSummary() async {
-    try {
-      final summary = await widget.service.summary();
-      if (mounted) setState(() => _summary = summary);
-    } on ConnectionFailure {
-      // não-crítico
-    }
-  }
-
   Future<void> _loadAddresses() async {
     try {
       final result = await widget.addressesService.list(pageSize: 200);
@@ -132,7 +120,6 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   void _refresh() {
     setState(() => _page = 1);
     _load();
-    _loadSummary();
   }
 
   void _onPageChanged(int page) {
@@ -230,10 +217,6 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
               ],
             ),
             const SizedBox(height: 24),
-            if (_summary != null) ...[
-              ConnectionSummaryCards(summary: _summary!),
-              const SizedBox(height: 24),
-            ],
             _FiltersRow(
               key: _filtersRowKey,
               addresses: _addresses,

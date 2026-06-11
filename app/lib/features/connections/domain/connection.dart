@@ -85,25 +85,3 @@ class Connection {
         exclusiveMember: exclusiveMember ?? this.exclusiveMember,
       );
 }
-
-class ConnectionSummary {
-  const ConnectionSummary({
-    required this.total,
-    required this.active,
-    required this.effective,
-    required this.temporary,
-  });
-
-  final int total;
-  final int active;
-  final int effective;
-  final int temporary;
-
-  factory ConnectionSummary.fromJson(Map<String, dynamic> json) =>
-      ConnectionSummary(
-        total: json['total'] as int,
-        active: json['active'] as int,
-        effective: json['effective'] as int,
-        temporary: json['temporary'] as int,
-      );
-}

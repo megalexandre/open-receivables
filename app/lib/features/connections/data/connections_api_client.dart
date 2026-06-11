@@ -13,7 +13,6 @@ abstract class ConnectionsApiClient {
     String? address,
     bool? active,
   });
-  Future<Map<String, dynamic>> summary();
   Future<Map<String, dynamic>> create(Connection connection);
   Future<Map<String, dynamic>> update(Connection connection);
   Future<void> delete(String id);
@@ -45,11 +44,6 @@ class HttpConnectionsApiClient extends BaseHttpResourceClient
     );
     return call(() => httpClient.getJson(uri));
   }
-
-  @override
-  Future<Map<String, dynamic>> summary() => call(
-        () => httpClient.getJson(Uri.parse(ApiEndpoints.connections.summary)),
-      );
 
   @override
   Future<Map<String, dynamic>> create(Connection connection) => call(

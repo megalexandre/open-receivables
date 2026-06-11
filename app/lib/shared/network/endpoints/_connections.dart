@@ -7,6 +7,5 @@ class _Connections {
 
   String get list => _path;
   String get create => _path;
-  String get summary => '$_path/summary';
   String byId(String id) => '$_path/$id';
 }

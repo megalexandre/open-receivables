@@ -55,15 +55,6 @@ class ConnectionsService {
     }
   }
 
-  Future<ConnectionSummary> summary() async {
-    try {
-      final json = await _apiClient.summary();
-      return ConnectionSummary.fromJson(json);
-    } on AppFailure catch (e) {
-      throw ConnectionFailure(e.type);
-    }
-  }
-
   Future<void> create(Connection connection) async {
     try {
       await _apiClient.create(connection);
