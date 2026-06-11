@@ -23,9 +23,3 @@ build/
 # Logs
 *.log
 
-.devcontainer/
-.env.example
-api/
-docker/
-
-
