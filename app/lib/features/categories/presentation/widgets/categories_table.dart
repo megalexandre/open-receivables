@@ -11,6 +11,7 @@ class CategoriesTable extends StatelessWidget {
     required this.categories,
     required this.onEdit,
     required this.onDelete,
+    required this.onReactivate,
     this.onSort,
     this.sortKey,
     this.sortAscending = true,
@@ -27,6 +28,7 @@ class CategoriesTable extends StatelessWidget {
   final List<Category> categories;
   final void Function(Category) onEdit;
   final void Function(Category) onDelete;
+  final void Function(Category) onReactivate;
   final void Function(String key, bool ascending)? onSort;
   final String? sortKey;
   final bool sortAscending;
@@ -54,8 +56,8 @@ class CategoriesTable extends StatelessWidget {
       onLoadMore: onLoadMore,
       hasMore: hasMore,
       columns: [
-        AppTableColumn(label: 'Grupo', sortKey: 'member_type', builder: (c) => SubcategoryText(value: c.memberType)),
-        AppTableColumn(label: 'Nome', sortKey: 'name', builder: (c) => Text(c.name)),
+        AppTableColumn(label: 'Nome', sortKey: 'name', flex: 3, builder: (c) => Text(c.name)),
+        AppTableColumn(label: 'Grupo', sortKey: 'member_type', flex: 1.5, builder: (c) => SubcategoryText(value: c.memberType)),
         AppTableColumn(label: 'Hidrômetro', sortKey: 'has_hydrometer', builder: (c) => YesNoBadge(value: c.waterMeter)),
         AppTableColumn(label: 'Valor Água (R\$)', sortKey: 'amount_water', numeric: true, builder: (c) => MoneyText(c.waterValue)),
         AppTableColumn(label: 'Valor Sócio (R\$)', sortKey: 'amount_partner', numeric: true, builder: (c) => MoneyText(c.memberValue)),
@@ -65,22 +67,43 @@ class CategoriesTable extends StatelessWidget {
           showInCard: false,
           builder: (c) => Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                tooltip: 'Editar',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () => onEdit(c),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, size: 18),
-                tooltip: 'Excluir',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () => onDelete(c),
-              ),
-            ],
+            children: c.active
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      tooltip: 'Editar',
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      onPressed: () => onEdit(c),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      tooltip: 'Excluir',
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      onPressed: () => onDelete(c),
+                    ),
+                  ]
+                : [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      tooltip: 'Visualizar',
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      onPressed: () => onEdit(c),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.restore, size: 18),
+                      tooltip: 'Reativar',
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      onPressed: () => onReactivate(c),
+                    ),
+                  ],
           ),
         ),
       ],

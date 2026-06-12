@@ -31,6 +31,7 @@ class CategoriesService {
     required int pageSize,
     String? sortBy,
     bool sortAscending = true,
+    bool? active,
   }) async {
     try {
       final json = await _apiClient.list(
@@ -38,6 +39,7 @@ class CategoriesService {
         pageSize: pageSize,
         sortBy: sortBy,
         sortAscending: sortAscending,
+        active: active,
       );
       final data = (json['data'] as List).cast<Map<String, dynamic>>();
       final pagination = json['pagination'] as Map<String, dynamic>;
@@ -77,6 +79,15 @@ class CategoriesService {
   Future<void> delete(String id) async {
     try {
       await _apiClient.delete(id);
+    } on AppFailure catch (e) {
+      throw CategoryFailure(e.type);
+    }
+  }
+
+  Future<Category> reactivate(String id) async {
+    try {
+      final json = await _apiClient.reactivate(id);
+      return Category.fromJson(json);
     } on AppFailure catch (e) {
       throw CategoryFailure(e.type);
     }

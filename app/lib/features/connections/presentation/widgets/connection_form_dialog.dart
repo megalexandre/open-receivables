@@ -4,6 +4,8 @@ import 'package:organizagrana/features/categories/domain/category.dart';
 import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
 import 'package:organizagrana/shared/errors/app_failure.dart' show ValidationFailure;
+import 'package:organizagrana/shared/widgets/form/category_dropdown.dart';
+import 'package:organizagrana/shared/widgets/form/member_autocomplete.dart';
 import 'package:organizagrana/shared/widgets/overlay/app_dialog.dart';
 
 typedef ConnectionSaveCallback = Future<void> Function(Connection connection);
@@ -11,7 +13,7 @@ typedef ConnectionSaveCallback = Future<void> Function(Connection connection);
 Future<bool> showConnectionFormDialog(
   BuildContext context, {
   Connection? connection,
-  required List<Member> members,
+  required MemberSearch searchMembers,
   required List<Address> addresses,
   required List<Category> categories,
   required ConnectionSaveCallback onSave,
@@ -20,7 +22,7 @@ Future<bool> showConnectionFormDialog(
     context: context,
     builder: (_) => ConnectionFormDialog(
       connection: connection,
-      members: members,
+      searchMembers: searchMembers,
       addresses: addresses,
       categories: categories,
       onSave: onSave,
@@ -33,14 +35,14 @@ class ConnectionFormDialog extends StatefulWidget {
   const ConnectionFormDialog({
     super.key,
     this.connection,
-    required this.members,
+    required this.searchMembers,
     required this.addresses,
     required this.categories,
     required this.onSave,
   });
 
   final Connection? connection;
-  final List<Member> members;
+  final MemberSearch searchMembers;
   final List<Address> addresses;
   final List<Category> categories;
   final ConnectionSaveCallback onSave;
@@ -53,6 +55,7 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
   final _formKey = GlobalKey<FormState>();
 
   String? _memberId;
+  String? _memberName;
   String? _addressId;
   String? _categoryId;
   late final TextEditingController _numeroCtrl;
@@ -68,6 +71,7 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
     super.initState();
     final c = widget.connection;
     _memberId = c?.memberId.isNotEmpty == true ? c!.memberId : null;
+    _memberName = c?.memberName.isNotEmpty == true ? c!.memberName : null;
     _addressId = c?.addressId.isNotEmpty == true ? c!.addressId : null;
     _categoryId = c?.categoryId.isNotEmpty == true ? c!.categoryId : null;
     _numeroCtrl = TextEditingController(text: c?.numero ?? '');
@@ -85,11 +89,7 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
   Connection _buildConnection() => Connection(
         id: widget.connection?.id ?? '',
         memberId: _memberId ?? '',
-        memberName: widget.members
-                .where((m) => m.id == _memberId)
-                .firstOrNull
-                ?.name ??
-            '',
+        memberName: _memberName ?? '',
         addressId: _addressId ?? '',
         address: widget.addresses
                 .where((a) => a.id == _addressId)
@@ -168,21 +168,20 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
               const SizedBox(height: 12),
             ],
             const _Label('Sócio'),
-            DropdownButtonFormField<String>(
-              initialValue: _memberId,
-              decoration: const InputDecoration(isDense: true),
-              isExpanded: true,
-              items: widget.members
-                  .map((m) => DropdownMenuItem(
-                        value: m.id,
-                        child: Text(
-                          '${m.memberNumber} – ${m.name}',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (v) => setState(() => _memberId = v),
-              validator: (v) => v == null ? 'Campo obrigatório' : null,
+            MemberAutocomplete(
+              search: widget.searchMembers,
+              initialValue: _memberId != null
+                  ? Member(
+                      id: _memberId!,
+                      name: _memberName ?? '',
+                      document: '',
+                    )
+                  : null,
+              onChanged: (m) => setState(() {
+                _memberId = m?.id;
+                _memberName = m?.name;
+              }),
+              validator: (m) => m == null ? 'Campo obrigatório' : null,
             ),
             const SizedBox(height: 12),
             const _Label('Endereço'),
@@ -204,16 +203,9 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
             ),
             const SizedBox(height: 12),
             const _Label('Categoria'),
-            DropdownButtonFormField<String>(
+            CategoryDropdown(
+              categories: widget.categories,
               initialValue: _categoryId,
-              decoration: const InputDecoration(isDense: true),
-              isExpanded: true,
-              items: widget.categories
-                  .map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name, overflow: TextOverflow.ellipsis),
-                      ))
-                  .toList(),
               onChanged: (v) => setState(() => _categoryId = v),
               validator: (v) => v == null ? 'Campo obrigatório' : null,
             ),

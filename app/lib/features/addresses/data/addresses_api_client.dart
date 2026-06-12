@@ -11,10 +11,12 @@ abstract class AddressesApiClient {
     bool sortAscending = true,
     String? addressType,
     String? name,
+    bool? active,
   });
   Future<Map<String, dynamic>> create(Address address);
   Future<Map<String, dynamic>> update(Address address);
   Future<void> delete(String id);
+  Future<Map<String, dynamic>> reactivate(String id);
 }
 
 class HttpAddressesApiClient extends BaseHttpResourceClient
@@ -30,6 +32,7 @@ class HttpAddressesApiClient extends BaseHttpResourceClient
     bool sortAscending = true,
     String? addressType,
     String? name,
+    bool? active,
   }) {
     final uri = Uri.parse(ApiEndpoints.addresses.list).replace(
       queryParameters: {
@@ -39,6 +42,7 @@ class HttpAddressesApiClient extends BaseHttpResourceClient
         if (sortBy != null) 'sort_order': sortAscending ? 'asc' : 'desc',
         if (addressType != null) 'address_type': addressType,
         if (name != null && name.isNotEmpty) 'name': name,
+        if (active != null) 'active': '$active',
       },
     );
     return call(() => httpClient.getJson(uri));
@@ -63,5 +67,13 @@ class HttpAddressesApiClient extends BaseHttpResourceClient
   @override
   Future<void> delete(String id) => callVoid(
         () => httpClient.deleteVoid(Uri.parse(ApiEndpoints.addresses.byId(id))),
+      );
+
+  @override
+  Future<Map<String, dynamic>> reactivate(String id) => call(
+        () => httpClient.patchJson(
+          Uri.parse(ApiEndpoints.addresses.reactivate(id)),
+          const {},
+        ),
       );
 }

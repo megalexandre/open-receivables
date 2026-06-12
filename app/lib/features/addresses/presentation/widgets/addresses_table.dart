@@ -8,6 +8,7 @@ class AddressesTable extends StatelessWidget {
     required this.addresses,
     required this.onEdit,
     required this.onDelete,
+    required this.onReactivate,
     this.onSort,
     this.sortKey,
     this.sortAscending = true,
@@ -19,6 +20,7 @@ class AddressesTable extends StatelessWidget {
   final List<Address> addresses;
   final void Function(Address) onEdit;
   final void Function(Address) onDelete;
+  final void Function(Address) onReactivate;
   final void Function(String key, bool ascending)? onSort;
   final String? sortKey;
   final bool sortAscending;
@@ -50,6 +52,7 @@ class AddressesTable extends StatelessWidget {
         AppTableColumn(
           label: 'Nome',
           sortKey: 'name',
+          flex: 5,
           builder: (a) => Text(a.name),
         ),
         AppTableColumn(
@@ -57,23 +60,41 @@ class AddressesTable extends StatelessWidget {
           showInCard: false,
           builder: (a) => Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 16),
-                tooltip: 'Editar',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => onEdit(a),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, size: 16),
-                tooltip: 'Excluir',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => onDelete(a),
-              ),
-            ],
+            children: a.active
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                      tooltip: 'Editar',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => onEdit(a),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 16),
+                      tooltip: 'Excluir',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => onDelete(a),
+                    ),
+                  ]
+                : [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                      tooltip: 'Visualizar',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => onEdit(a),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.restore, size: 16),
+                      tooltip: 'Reativar',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => onReactivate(a),
+                    ),
+                  ],
           ),
         ),
       ],

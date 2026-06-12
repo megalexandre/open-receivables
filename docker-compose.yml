@@ -6,7 +6,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: api_production
     ports:
-      - "3306:3306"
+      # 3307 no host para não conflitar com o MySQL do docker rootless de outro usuário em 3306
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql

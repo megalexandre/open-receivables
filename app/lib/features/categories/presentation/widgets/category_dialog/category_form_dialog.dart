@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/categories/domain/category.dart';
+import 'package:organizagrana/features/categories/domain/category_failure.dart';
 import 'package:organizagrana/shared/errors/api_error_code.dart';
 import 'package:organizagrana/shared/errors/app_failure.dart' show ValidationFailure;
 import 'package:organizagrana/shared/utils/currency_input_formatter.dart';
@@ -12,10 +13,15 @@ Future<bool> showCategoryFormDialog(
   BuildContext context, {
   Category? category,
   required CategorySaveCallback onSave,
+  CategorySaveCallback? onReactivate,
 }) async {
   final saved = await showAppDialog<bool>(
     context: context,
-    builder: (_) => CategoryFormDialog(category: category, onSave: onSave),
+    builder: (_) => CategoryFormDialog(
+      category: category,
+      onSave: onSave,
+      onReactivate: onReactivate,
+    ),
   );
   return saved ?? false;
 }
@@ -25,10 +31,12 @@ class CategoryFormDialog extends StatefulWidget {
     super.key,
     this.category,
     required this.onSave,
+    this.onReactivate,
   });
 
   final Category? category;
   final CategorySaveCallback onSave;
+  final CategorySaveCallback? onReactivate;
 
   @override
   State<CategoryFormDialog> createState() => _CategoryFormDialogState();
@@ -46,6 +54,8 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
 
   bool _saving = false;
   String? _apiError;
+
+  bool get _isInactive => widget.category?.active == false;
 
   @override
   void initState() {
@@ -112,6 +122,25 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
     }
   }
 
+  Future<void> _reactivate() async {
+    setState(() {
+      _saving = true;
+      _apiError = null;
+    });
+
+    try {
+      await widget.onReactivate!(widget.category!);
+      if (mounted) Navigator.of(context).pop(true);
+    } on CategoryFailure catch (e) {
+      setState(() {
+        _saving = false;
+        _apiError = e.message;
+      });
+    } catch (_) {
+      if (mounted) Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -141,9 +170,28 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
               ),
               const SizedBox(height: 12),
             ],
+            if (_isInactive) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  border: Border.all(color: colorScheme.outline),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Categoria inativa. Reative para poder editar.',
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             const _Label('Nome'),
             TextFormField(
               controller: _nameCtrl,
+              enabled: !_isInactive,
               decoration: const InputDecoration(
                 hintText: '',
                 isDense: true,
@@ -155,6 +203,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             const _Label('Descrição'),
             TextFormField(
               controller: _descricaoCtrl,
+              enabled: !_isInactive,
               maxLines: 2,
               decoration: const InputDecoration(isDense: true),
             ),
@@ -162,7 +211,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             const _Label('Grupo'),
             SubcategoryDropdown(
               initialValue: _memberType,
-              onChanged: (v) => setState(() => _memberType = v),
+              onChanged: _isInactive ? null : (v) => setState(() => _memberType = v),
             ),
             const SizedBox(height: 12),
             const _Label('Hidrômetro?'),
@@ -172,7 +221,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                 DropdownMenuItem(value: true, child: Text('Sim')),
                 DropdownMenuItem(value: false, child: Text('Não')),
               ],
-              onChanged: (v) => setState(() => _waterMeter = v!),
+              onChanged: _isInactive ? null : (v) => setState(() => _waterMeter = v!),
               decoration: const InputDecoration(isDense: true),
             ),
             const SizedBox(height: 12),
@@ -185,6 +234,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                       const _Label('Valor Água'),
                       TextFormField(
                         controller: _waterValueCtrl,
+                        enabled: !_isInactive,
                         keyboardType: TextInputType.number,
                         inputFormatters: [CurrencyInputFormatter()],
                         decoration: const InputDecoration(
@@ -206,6 +256,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                       const _Label('Valor Sócio'),
                       TextFormField(
                         controller: _memberValueCtrl,
+                        enabled: !_isInactive,
                         keyboardType: TextInputType.number,
                         inputFormatters: [CurrencyInputFormatter()],
                         decoration: const InputDecoration(
@@ -231,15 +282,16 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
           child: const Text('Cancelar'),
         ),
         FilledButton.icon(
-          onPressed: _saving ? null : _submit,
+          onPressed: _saving ? null : (_isInactive ? _reactivate : _submit),
           icon: _saving
               ? const SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.save_outlined, size: 16),
-          label: const Text('Salvar'),
+              : Icon(_isInactive ? Icons.restore : Icons.save_outlined,
+                  size: 16),
+          label: Text(_isInactive ? 'Reativar' : 'Salvar'),
         ),
       ],
     );

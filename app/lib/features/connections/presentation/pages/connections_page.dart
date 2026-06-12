@@ -35,7 +35,6 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   final _filtersRowKey = GlobalKey<_FiltersRowState>();
   List<Connection> _connections = [];
   List<Address> _addresses = [];
-  List<Member> _members = [];
   List<Category> _categories = [];
   int _total = 0;
   int _page = 1;
@@ -54,7 +53,6 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     super.initState();
     _load();
     _loadAddresses();
-    _loadMembers();
     _loadCategories();
   }
 
@@ -103,11 +101,11 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     } catch (_) {}
   }
 
-  Future<void> _loadMembers() async {
-    try {
-      final result = await widget.membersService.list(pageSize: 200);
-      if (mounted) setState(() => _members = result.members);
-    } catch (_) {}
+  Future<List<Member>> _searchMembers(String query) async {
+    final result = await widget.membersService.list(
+      name: query.isEmpty ? null : query,
+    );
+    return result.members;
   }
 
   Future<void> _loadCategories() async {
@@ -153,7 +151,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     final saved = await showConnectionFormDialog(
       context,
       connection: connection,
-      members: _members,
+      searchMembers: _searchMembers,
       addresses: _addresses,
       categories: _categories,
       onSave: (c) => connection == null
@@ -305,71 +303,81 @@ class _FiltersRowState extends State<_FiltersRow> {
 
   @override
   Widget build(BuildContext context) {
+    final memberField = TextField(
+      controller: _memberCtrl,
+      decoration: const InputDecoration(
+        labelText: 'Sócio',
+        hintText: 'Nome do sócio...',
+        isDense: true,
+      ),
+      onChanged: widget.onMemberChanged,
+    );
+
+    final addressField = DropdownButtonFormField<String?>(
+      initialValue: _addressFilter,
+      isExpanded: true,
+      decoration: const InputDecoration(
+        labelText: 'Rua / Endereço',
+        isDense: true,
+      ),
+      items: [
+        const DropdownMenuItem(child: Text('Todas as ruas')),
+        ...widget.addresses.map(
+          (a) => DropdownMenuItem(
+            value: a.id,
+            child: Text(
+              '${a.addressType} ${a.name}',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ],
+      onChanged: (v) {
+        setState(() => _addressFilter = v);
+        widget.onAddressChanged(v);
+      },
+    );
+
+    final statusField = DropdownButtonFormField<bool?>(
+      initialValue: _activeFilter,
+      isExpanded: true,
+      decoration: const InputDecoration(
+        labelText: 'Status',
+        isDense: true,
+      ),
+      items: const [
+        DropdownMenuItem(child: Text('Todos')),
+        DropdownMenuItem(value: true, child: Text('Sim')),
+        DropdownMenuItem(value: false, child: Text('Não')),
+      ],
+      onChanged: (v) {
+        setState(() => _activeFilter = v);
+        widget.onActiveChanged(v);
+      },
+    );
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 200,
-              child: TextField(
-                controller: _memberCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Sócio',
-                  hintText: 'Nome do sócio...',
-                  isDense: true,
-                ),
-                onChanged: widget.onMemberChanged,
-              ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 220,
-              child: DropdownButtonFormField<String?>(
-                initialValue: _addressFilter,
-                decoration: const InputDecoration(
-                  labelText: 'Rua / Endereço',
-                  isDense: true,
-                ),
-                items: [
-                  const DropdownMenuItem(child: Text('Todas as ruas')),
-                  ...widget.addresses.map(
-                    (a) => DropdownMenuItem(
-                      value: a.id,
-                      child: Text(
-                        '${a.addressType} ${a.name}',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ],
-                onChanged: (v) {
-                  setState(() => _addressFilter = v);
-                  widget.onAddressChanged(v);
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 160,
-              child: DropdownButtonFormField<bool?>(
-                initialValue: _activeFilter,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  isDense: true,
-                ),
-                items: const [
-                  DropdownMenuItem(child: Text('Todos')),
-                  DropdownMenuItem(value: true, child: Text('Sim')),
-                  DropdownMenuItem(value: false, child: Text('Não')),
-                ],
-                onChanged: (v) {
-                  setState(() => _activeFilter = v);
-                  widget.onActiveChanged(v);
-                },
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Estreito: campos empilhados ocupando 100% (como col-12).
+            if (constraints.maxWidth < 600) {
+              return Column(
+                spacing: 12,
+                children: [memberField, addressField, statusField],
+              );
+            }
+            // Largo: divide a linha em proporção 4/3/2 (como col-*).
+            return Row(
+              spacing: 12,
+              children: [
+                Expanded(flex: 4, child: memberField),
+                Expanded(flex: 3, child: addressField),
+                Expanded(flex: 2, child: statusField),
+              ],
+            );
+          },
         ),
       ),
     );

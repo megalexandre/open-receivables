@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/addresses/domain/address.dart';
+import 'package:organizagrana/features/addresses/domain/address_failure.dart';
 import 'package:organizagrana/shared/errors/api_error_code.dart';
 import 'package:organizagrana/shared/errors/app_failure.dart'
     show AppFailure, ValidationFailure;
@@ -11,19 +12,30 @@ Future<bool> showAddressFormDialog(
   BuildContext context, {
   Address? address,
   required AddressSaveCallback onSave,
+  AddressSaveCallback? onReactivate,
 }) async {
   final saved = await showAppDialog<bool>(
     context: context,
-    builder: (_) => AddressFormDialog(address: address, onSave: onSave),
+    builder: (_) => AddressFormDialog(
+      address: address,
+      onSave: onSave,
+      onReactivate: onReactivate,
+    ),
   );
   return saved ?? false;
 }
 
 class AddressFormDialog extends StatefulWidget {
-  const AddressFormDialog({super.key, this.address, required this.onSave});
+  const AddressFormDialog({
+    super.key,
+    this.address,
+    required this.onSave,
+    this.onReactivate,
+  });
 
   final Address? address;
   final AddressSaveCallback onSave;
+  final AddressSaveCallback? onReactivate;
 
   @override
   State<AddressFormDialog> createState() => _AddressFormDialogState();
@@ -38,6 +50,8 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
 
   bool _saving = false;
   String? _apiError;
+
+  bool get _isInactive => widget.address?.active == false;
 
   @override
   void initState() {
@@ -88,6 +102,25 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
     }
   }
 
+  Future<void> _reactivate() async {
+    setState(() {
+      _saving = true;
+      _apiError = null;
+    });
+
+    try {
+      await widget.onReactivate!(widget.address!);
+      if (mounted) Navigator.of(context).pop(true);
+    } on AddressFailure catch (e) {
+      setState(() {
+        _saving = false;
+        _apiError = e.message;
+      });
+    } catch (_) {
+      if (mounted) Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -119,6 +152,24 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
               ),
               const SizedBox(height: 12),
             ],
+            if (_isInactive) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  border: Border.all(color: colorScheme.outline),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Endereço inativo. Reative para poder editar.',
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             Row(
               children: [
                 Expanded(
@@ -143,7 +194,9 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                             child: Text('Avenida'),
                           ),
                         ],
-                        onChanged: (v) => setState(() => _addressType = v!),
+                        onChanged: _isInactive
+                            ? null
+                            : (v) => setState(() => _addressType = v!),
                         decoration: const InputDecoration(isDense: true),
                       ),
                     ],
@@ -157,6 +210,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                       const _Label('Nome'),
                       TextFormField(
                         controller: _nameCtrl,
+                        enabled: !_isInactive,
                         decoration: const InputDecoration(
                           hintText: 'Digite o logradouro',
                           isDense: true,
@@ -174,6 +228,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
             const _Label('Observações'),
             TextFormField(
               controller: _notesCtrl,
+              enabled: !_isInactive,
               maxLines: 3,
               decoration: const InputDecoration(
                 hintText: 'Opcional',
@@ -190,15 +245,16 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
           child: const Text('Cancelar'),
         ),
         FilledButton.icon(
-          onPressed: _saving ? null : _submit,
+          onPressed: _saving ? null : (_isInactive ? _reactivate : _submit),
           icon: _saving
               ? const SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.save_outlined, size: 16),
-          label: const Text('Salvar'),
+              : Icon(_isInactive ? Icons.restore : Icons.save_outlined,
+                  size: 16),
+          label: Text(_isInactive ? 'Reativar' : 'Salvar'),
         ),
       ],
     );

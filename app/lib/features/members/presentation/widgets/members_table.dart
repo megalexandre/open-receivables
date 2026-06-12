@@ -47,18 +47,19 @@ class MembersTable extends StatelessWidget {
       hasMore: hasMore,
       columns: [
         AppTableColumn(
-          label: 'Número',
-          sortKey: 'member_number',
-          builder: (m) => Text(m.memberNumber?.toString() ?? ''),
-        ),
-        AppTableColumn(
           label: 'Nome',
           sortKey: 'name',
+          flex: 7,
           builder: (m) => Text(m.name),
         ),
         AppTableColumn(
           label: 'Documento',
           builder: (m) => DocumentText(m.document),
+        ),
+        AppTableColumn(
+          label: 'Número',
+          sortKey: 'member_number',
+          builder: (m) => Text(m.memberNumber?.toString() ?? ''),
         ),
         AppTableColumn(
           label: 'Votante',

@@ -30,6 +30,7 @@ class _AddressesPageState extends State<AddressesPage> {
   String? _error;
   String? _filterAddressType;
   String? _filterName;
+  bool? _filterActive;
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _AddressesPageState extends State<AddressesPage> {
         sortAscending: _sortAscending,
         addressType: _filterAddressType,
         name: _filterName,
+        active: _filterActive,
       );
       if (mounted) {
         setState(() {
@@ -92,10 +94,11 @@ class _AddressesPageState extends State<AddressesPage> {
     _loadMore();
   }
 
-  void _onFilter({String? addressType, String? name}) {
+  void _onFilter({String? addressType, String? name, bool? active}) {
     setState(() {
       _filterAddressType = addressType;
       _filterName = name;
+      _filterActive = active;
       _reset();
     });
     _loadMore();
@@ -112,8 +115,20 @@ class _AddressesPageState extends State<AddressesPage> {
           await widget.service.update(result);
         }
       },
+      onReactivate: (result) async {
+        await widget.service.reactivate(result.id);
+      },
     );
     if (saved) _refresh();
+  }
+
+  Future<void> _reactivate(Address address) async {
+    try {
+      await widget.service.reactivate(address.id);
+      _refresh();
+    } on AddressFailure catch (e) {
+      if (mounted) _showError(e.message);
+    }
   }
 
   Future<void> _confirmDelete(Address address) async {
@@ -188,6 +203,7 @@ class _AddressesPageState extends State<AddressesPage> {
                           sortAscending: _sortAscending,
                           onEdit: _openForm,
                           onDelete: _confirmDelete,
+                          onReactivate: _reactivate,
                           loading: _loading,
                           onLoadMore: _loadMore,
                           hasMore: _hasMore,

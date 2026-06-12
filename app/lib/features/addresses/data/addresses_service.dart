@@ -33,6 +33,7 @@ class AddressesService {
     bool sortAscending = true,
     String? addressType,
     String? name,
+    bool? active,
   }) async {
     try {
       final json = await _apiClient.list(
@@ -42,6 +43,7 @@ class AddressesService {
         sortAscending: sortAscending,
         addressType: addressType,
         name: name,
+        active: active,
       );
       final data = (json['data'] as List).cast<Map<String, dynamic>>();
       final pagination = json['pagination'] as Map<String, dynamic>;
@@ -81,6 +83,15 @@ class AddressesService {
   Future<void> delete(String id) async {
     try {
       await _apiClient.delete(id);
+    } on AppFailure catch (e) {
+      throw AddressFailure(e.type);
+    }
+  }
+
+  Future<Address> reactivate(String id) async {
+    try {
+      final json = await _apiClient.reactivate(id);
+      return Address.fromJson(json);
     } on AppFailure catch (e) {
       throw AddressFailure(e.type);
     }

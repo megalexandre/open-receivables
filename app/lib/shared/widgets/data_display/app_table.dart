@@ -9,6 +9,7 @@ class AppTableColumn<T> {
     this.sortKey,
     this.numeric = false,
     this.showInCard = true,
+    this.flex = 1,
   });
 
   final String label;
@@ -16,6 +17,10 @@ class AppTableColumn<T> {
   final String? sortKey;
   final bool numeric;
   final bool showInCard;
+
+  /// Proporção de largura em relação às outras colunas (flex 2 = 2x mais
+  /// larga que uma coluna flex 1).
+  final double flex;
 }
 
 class AppTable<T> extends StatefulWidget {
@@ -203,7 +208,7 @@ class _AppTableState<T> extends State<AppTable<T>> {
           enableColumnDrag: false,
           enableContextMenu: false,
           enableDropToResize: !isActions,
-          width: isActions ? 96 : 150,
+          width: isActions ? 96 : 150 * col.flex,
           minWidth: isActions ? 96 : 80,
           suppressedAutoSize: isActions,
           renderer: (rendererContext) {

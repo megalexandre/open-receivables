@@ -7,6 +7,7 @@ class Category {
     required this.waterValue,
     required this.memberValue,
     this.descricao,
+    this.active = true,
   });
 
   static const memberTypes = [
@@ -22,6 +23,7 @@ class Category {
   final double waterValue;
   final double memberValue;
   final String? descricao;
+  final bool active;
 
   double get total => waterValue + memberValue;
 
@@ -33,6 +35,7 @@ class Category {
         waterValue: (json['amount_water'] as num?)?.toDouble() ?? 0.0,
         memberValue: (json['amount_partner'] as num?)?.toDouble() ?? 0.0,
         descricao: json['descricao'] as String?,
+        active: json['active'] as bool? ?? true,
       );
 
   Map<String, dynamic> toJson() => {
@@ -53,6 +56,7 @@ class Category {
     double? waterValue,
     double? memberValue,
     String? descricao,
+    bool? active,
   }) =>
       Category(
         id: id ?? this.id,
@@ -62,5 +66,6 @@ class Category {
         waterValue: waterValue ?? this.waterValue,
         memberValue: memberValue ?? this.memberValue,
         descricao: descricao ?? this.descricao,
+        active: active ?? this.active,
       );
 }

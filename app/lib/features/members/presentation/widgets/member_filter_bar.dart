@@ -48,59 +48,73 @@ class MemberFilterBarState extends State<MemberFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final nameField = TextField(
+      controller: _nameCtrl,
+      decoration: const InputDecoration(
+        hintText: 'Nome...',
+        isDense: true,
+        prefixIcon: Icon(Icons.search, size: 16),
+      ),
+      onSubmitted: (_) => _notify(),
+    );
+
+    final documentField = TextField(
+      controller: _documentCtrl,
+      decoration: const InputDecoration(
+        hintText: 'Documento...',
+        isDense: true,
+        prefixIcon: Icon(Icons.badge_outlined, size: 16),
+      ),
+      onSubmitted: (_) => _notify(),
+    );
+
+    final activeField = DropdownButtonFormField<bool>(
+      initialValue: _active,
+      isExpanded: true,
+      hint: const Text('Situação'),
+      decoration: const InputDecoration(isDense: true),
+      items: const [
+        DropdownMenuItem(child: Text('Ativos')),
+        DropdownMenuItem(value: false, child: Text('Inativos')),
+      ],
+      onChanged: (v) => setState(() => _active = v),
+    );
+
+    final actions = Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      spacing: 8,
+      children: [
+        if (_hasFilters)
+          TextButton(onPressed: clear, child: const Text('Limpar')),
+        FilledButton.icon(
+          onPressed: _notify,
+          icon: const Icon(Icons.search, size: 16),
+          label: const Text('Consultar'),
+        ),
+      ],
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 300,
-            child: TextField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Nome...',
-                isDense: true,
-                prefixIcon: Icon(Icons.search, size: 16),
-              ),
-              onSubmitted: (_) => _notify(),
-            ),
-          ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 250,
-            child: TextField(
-              controller: _documentCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Documento...',
-                isDense: true,
-                prefixIcon: Icon(Icons.badge_outlined, size: 16),
-              ),
-              onSubmitted: (_) => _notify(),
-            ),
-          ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 160,
-            child: DropdownButtonFormField<bool>(
-              initialValue: _active,
-              hint: const Text('Situação'),
-              decoration: const InputDecoration(isDense: true),
-              items: const [
-                DropdownMenuItem(child: Text('Ativos')),
-                DropdownMenuItem(value: false, child: Text('Inativos')),
-              ],
-              onChanged: (v) => setState(() => _active = v),
-            ),
-          ),
-          const Spacer(),
-          if (_hasFilters)
-            TextButton(onPressed: clear, child: const Text('Limpar')),
-          const SizedBox(width: 8),
-          FilledButton.icon(
-            onPressed: _notify,
-            icon: const Icon(Icons.search, size: 16),
-            label: const Text('Consultar'),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Estreito: campos empilhados ocupando 100% (como col-12).
+          final fields = constraints.maxWidth < 600
+              ? Column(
+                  spacing: 12,
+                  children: [nameField, documentField, activeField],
+                )
+              // Largo: divide a linha em 50/25/25 (como col-6/col-3/col-3).
+              : Row(
+                  spacing: 12,
+                  children: [
+                    Expanded(flex: 2, child: nameField),
+                    Expanded(child: documentField),
+                    Expanded(child: activeField),
+                  ],
+                );
+          return Column(spacing: 12, children: [fields, actions]);
+        },
       ),
     );
   }
