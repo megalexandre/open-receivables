@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:organizagrana/features/addresses/domain/address.dart';
+import 'package:organizagrana/features/water_quality/domain/water_analysis.dart';
 import 'package:organizagrana/shared/errors/api_error_code.dart';
 
 void main() {
@@ -15,6 +16,8 @@ void main() {
           ApiErrorCode.categoryMemberTypeInvalid);
       expect(ApiErrorCode.fromCode('E_MEMBER_DUPLICATED'),
           ApiErrorCode.memberDocumentDuplicated);
+      expect(ApiErrorCode.fromCode('E_WATER_ANALYSIS_DUPLICATED'),
+          ApiErrorCode.waterAnalysisDuplicated);
     });
 
     test('código desconhecido cai em unknown', () {
@@ -31,6 +34,16 @@ void main() {
       expect(
         ApiErrorCode.addressDuplicated.messageFor(params),
         'O logradouro "Rua das Flores" já está cadastrado',
+      );
+    });
+
+    test('waterAnalysisDuplicated interpola a referência do lote', () {
+      const batch = WaterAnalysisBatch(month: 6, year: 2026, entries: []);
+      final params = ApiErrorCode.paramsFromWaterBatch(batch);
+
+      expect(
+        ApiErrorCode.waterAnalysisDuplicated.messageFor(params),
+        'Já existe uma análise de água cadastrada para a referência 06/2026',
       );
     });
 

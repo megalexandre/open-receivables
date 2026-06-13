@@ -71,7 +71,12 @@ class AppDialog extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(padding: contentPadding, child: content),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: contentPadding,
+                child: content,
+              ),
+            ),
             if (actions.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),

@@ -3,6 +3,9 @@ import 'package:organizagrana/features/water_quality/domain/water_analysis.dart'
 import 'package:organizagrana/features/water_quality/domain/water_quality_failure.dart';
 import 'package:organizagrana/shared/errors/app_failure.dart';
 
+export 'package:organizagrana/shared/errors/app_failure.dart'
+    show ValidationFailure, ApiValidationError;
+
 class WaterQualityResult {
   const WaterQualityResult({
     required this.analyses,
@@ -54,6 +57,8 @@ class WaterQualityService {
   Future<void> create(WaterAnalysisBatch batch) async {
     try {
       await _apiClient.create(batch);
+    } on ValidationFailure {
+      rethrow;
     } on AppFailure catch (e) {
       throw WaterQualityFailure(e.type);
     }

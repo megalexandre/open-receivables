@@ -131,14 +131,11 @@ class _WaterQualityPageState extends State<WaterQualityPage> {
   }
 
   Future<void> _openForm() async {
-    final batch = await WaterAnalysisFormDialog.show(context);
-    if (batch == null) return;
-    try {
-      await widget.service.create(batch);
-      _refresh();
-    } on WaterQualityFailure catch (e) {
-      if (mounted) _showError(e.message);
-    }
+    final saved = await WaterAnalysisFormDialog.show(
+      context,
+      onSave: widget.service.create,
+    );
+    if (saved && mounted) _refresh();
   }
 
   void _showError(String message) {

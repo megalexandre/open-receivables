@@ -1,6 +1,7 @@
 import 'package:organizagrana/features/addresses/domain/address.dart';
 import 'package:organizagrana/features/categories/domain/category.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
+import 'package:organizagrana/features/water_quality/domain/water_analysis.dart';
 
 typedef ErrorParams = Map<String, String?>;
 
@@ -10,6 +11,7 @@ enum ApiErrorCode {
   categoryMemberTypeInvalid('E_CATEGORY_INVALID', _categoryMemberTypeInvalid),
   memberDocumentDuplicated('E_MEMBER_DUPLICATED', _memberDocumentDuplicated),
   addressDuplicated('E_ADDRESS_DUPLICATED', _addressDuplicated),
+  waterAnalysisDuplicated('E_WATER_ANALYSIS_DUPLICATED', _waterAnalysisDuplicated),
   unknown('', _unknownMessage);
 
   const ApiErrorCode(this.code, this._messageFn);
@@ -33,6 +35,10 @@ enum ApiErrorCode {
     'address_type': a.addressType,
     'name': a.name,
   };
+
+  static ErrorParams paramsFromWaterBatch(WaterAnalysisBatch b) => {
+    'reference': '${b.month.toString().padLeft(2, '0')}/${b.year}',
+  };
 }
 
 String _categoryNameDuplicated(ErrorParams p) =>
@@ -48,5 +54,8 @@ String _memberDocumentDuplicated(ErrorParams p) =>
 
 String _addressDuplicated(ErrorParams p) =>
     'O logradouro "${p['address_type']} ${p['name']}" já está cadastrado';
+
+String _waterAnalysisDuplicated(ErrorParams p) =>
+    'Já existe uma análise de água cadastrada para a referência ${p['reference']}';
 
 String _unknownMessage(ErrorParams _) => 'Erro desconhecido';

@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:organizagrana/features/water_quality/domain/water_analysis.dart';
+import 'package:organizagrana/shared/errors/api_error_code.dart';
+import 'package:organizagrana/shared/errors/app_failure.dart'
+    show AppFailure, ValidationFailure;
 import 'package:organizagrana/shared/widgets/overlay/app_dialog.dart';
 
-class WaterAnalysisFormDialog extends StatefulWidget {
-  const WaterAnalysisFormDialog({super.key});
+typedef WaterAnalysisSaveCallback = Future<void> Function(
+    WaterAnalysisBatch batch);
 
-  static Future<WaterAnalysisBatch?> show(BuildContext context) =>
-      showAppDialog<WaterAnalysisBatch>(
-        context: context,
-        builder: (_) => const WaterAnalysisFormDialog(),
-      );
+class WaterAnalysisFormDialog extends StatefulWidget {
+  const WaterAnalysisFormDialog({super.key, required this.onSave});
+
+  final WaterAnalysisSaveCallback onSave;
+
+  static Future<bool> show(
+    BuildContext context, {
+    required WaterAnalysisSaveCallback onSave,
+  }) async {
+    final saved = await showAppDialog<bool>(
+      context: context,
+      builder: (_) => WaterAnalysisFormDialog(onSave: onSave),
+    );
+    return saved ?? false;
+  }
 
   @override
   State<WaterAnalysisFormDialog> createState() =>
@@ -23,6 +36,9 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
   final now = DateTime.now();
   late int _month = DateTime.now().month;
   late int _year = DateTime.now().year;
+
+  bool _saving = false;
+  String? _apiError;
 
   // Controllers indexed by parameter index: [required, analyzed, conformity]
   late final List<List<TextEditingController>> _controllers =
@@ -49,8 +65,13 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _saving = true;
+      _apiError = null;
+    });
+
     final entries = List.generate(kWaterParameters.length, (i) {
       return WaterAnalysisEntry(
         parameter: kWaterParameters[i],
@@ -59,11 +80,29 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
         conformity: double.parse(_controllers[i][2].text),
       );
     });
-    Navigator.of(context).pop(WaterAnalysisBatch(
+    final batch = WaterAnalysisBatch(
       month: _month,
       year: _year,
       entries: entries,
-    ));
+    );
+
+    try {
+      await widget.onSave(batch);
+      if (mounted) Navigator.of(context).pop(true);
+    } on ValidationFailure catch (e) {
+      final params = ApiErrorCode.paramsFromWaterBatch(batch);
+      setState(() {
+        _saving = false;
+        _apiError = e.errors.map((err) => err.messageFor(params)).join('\n');
+      });
+    } on AppFailure catch (e) {
+      setState(() {
+        _saving = false;
+        _apiError = e.message;
+      });
+    } catch (_) {
+      if (mounted) Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -80,6 +119,24 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_apiError != null) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  border: Border.all(color: theme.colorScheme.error),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  _apiError!,
+                  style: TextStyle(
+                    color: theme.colorScheme.onErrorContainer,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             Text(
               'Insira os resultados das medições de laboratório para o período.',
               style: theme.textTheme.bodySmall,
@@ -150,12 +207,19 @@ class _WaterAnalysisFormDialogState extends State<WaterAnalysisFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _saving ? null : () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
-        FilledButton(
-          onPressed: _submit,
-          child: const Text('Salvar Análise'),
+        FilledButton.icon(
+          onPressed: _saving ? null : _submit,
+          icon: _saving
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.save_outlined, size: 16),
+          label: const Text('Salvar Análise'),
         ),
       ],
     );

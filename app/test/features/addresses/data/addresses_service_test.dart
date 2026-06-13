@@ -36,6 +36,7 @@ class _FakeAddressesApiClient implements AddressesApiClient {
     bool sortAscending = true,
     String? addressType,
     String? name,
+    bool? active,
   }) async {
     if (error != null) throw error!;
     return response!;
@@ -56,6 +57,12 @@ class _FakeAddressesApiClient implements AddressesApiClient {
   @override
   Future<void> delete(String id) async {
     if (error != null) throw error!;
+  }
+
+  @override
+  Future<Map<String, dynamic>> reactivate(String id) async {
+    if (error != null) throw error!;
+    return response!;
   }
 }
 
