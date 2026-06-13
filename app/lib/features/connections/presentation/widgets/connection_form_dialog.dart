@@ -58,9 +58,9 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
   String? _memberName;
   String? _addressId;
   String? _categoryId;
-  late final TextEditingController _numeroCtrl;
-  DateTime? _datamatricula;
-  late bool _exclusiveMember;
+  late final TextEditingController _numberCtrl;
+  DateTime? _registrationDate;
+  late bool _partnerExclusive;
   late bool _active;
 
   bool _saving = false;
@@ -74,15 +74,15 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
     _memberName = c?.memberName.isNotEmpty == true ? c!.memberName : null;
     _addressId = c?.addressId.isNotEmpty == true ? c!.addressId : null;
     _categoryId = c?.categoryId.isNotEmpty == true ? c!.categoryId : null;
-    _numeroCtrl = TextEditingController(text: c?.numero ?? '');
-    _datamatricula = c?.datamatricula;
-    _exclusiveMember = c?.exclusiveMember ?? false;
+    _numberCtrl = TextEditingController(text: c?.number ?? '');
+    _registrationDate = c?.registrationDate;
+    _partnerExclusive = c?.partnerExclusive ?? false;
     _active = c?.active ?? true;
   }
 
   @override
   void dispose() {
-    _numeroCtrl.dispose();
+    _numberCtrl.dispose();
     super.dispose();
   }
 
@@ -104,19 +104,19 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
                 ?.name ??
             '',
         value: 0,
-        numero: _numeroCtrl.text.trim().isNotEmpty ? _numeroCtrl.text.trim() : null,
-        datamatricula: _datamatricula,
-        exclusiveMember: _exclusiveMember,
+        number: _numberCtrl.text.trim().isNotEmpty ? _numberCtrl.text.trim() : null,
+        registrationDate: _registrationDate,
+        partnerExclusive: _partnerExclusive,
       );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _datamatricula ?? DateTime.now(),
+      initialDate: _registrationDate ?? DateTime.now(),
       firstDate: DateTime(1980),
       lastDate: DateTime(2100),
     );
-    if (picked != null) setState(() => _datamatricula = picked);
+    if (picked != null) setState(() => _registrationDate = picked);
   }
 
   Future<void> _submit() async {
@@ -212,7 +212,7 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
             const SizedBox(height: 12),
             const _Label('Número'),
             TextFormField(
-              controller: _numeroCtrl,
+              controller: _numberCtrl,
               decoration: const InputDecoration(isDense: true),
             ),
             const SizedBox(height: 12),
@@ -224,8 +224,8 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
                   decoration: InputDecoration(
                     isDense: true,
                     suffixIcon: const Icon(Icons.calendar_today_outlined, size: 16),
-                    hintText: _datamatricula != null
-                        ? '${_datamatricula!.day.toString().padLeft(2, '0')}/${_datamatricula!.month.toString().padLeft(2, '0')}/${_datamatricula!.year}'
+                    hintText: _registrationDate != null
+                        ? '${_registrationDate!.day.toString().padLeft(2, '0')}/${_registrationDate!.month.toString().padLeft(2, '0')}/${_registrationDate!.year}'
                         : 'Selecionar data',
                   ),
                 ),
@@ -234,13 +234,13 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
             const SizedBox(height: 12),
             const _Label('Sócio exclusivo?'),
             DropdownButtonFormField<bool>(
-              initialValue: _exclusiveMember,
+              initialValue: _partnerExclusive,
               decoration: const InputDecoration(isDense: true),
               items: const [
                 DropdownMenuItem(value: true, child: Text('Sim')),
                 DropdownMenuItem(value: false, child: Text('Não')),
               ],
-              onChanged: (v) => setState(() => _exclusiveMember = v!),
+              onChanged: (v) => setState(() => _partnerExclusive = v!),
             ),
             if (isEdit) ...[
               const SizedBox(height: 12),

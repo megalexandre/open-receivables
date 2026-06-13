@@ -9,9 +9,9 @@ class Connection {
     required this.categoryId,
     required this.categoryName,
     required this.value,
-    this.numero,
-    this.datamatricula,
-    required this.exclusiveMember,
+    this.number,
+    this.registrationDate,
+    required this.partnerExclusive,
   });
 
   final String id;
@@ -23,9 +23,9 @@ class Connection {
   final String categoryId;
   final String categoryName;
   final double value;
-  final String? numero;
-  final DateTime? datamatricula;
-  final bool exclusiveMember;
+  final String? number;
+  final DateTime? registrationDate;
+  final bool partnerExclusive;
 
   factory Connection.fromJson(Map<String, dynamic> json) => Connection(
         id: json['id'] as String,
@@ -37,23 +37,22 @@ class Connection {
         categoryId: json['category_id'] as String? ?? '',
         categoryName: json['category_name'] as String,
         value: (json['value'] as num).toDouble(),
-        numero: json['numero'] as String?,
-        datamatricula: json['datamatricula'] != null
-            ? DateTime.tryParse(json['datamatricula'].toString())
+        number: json['number'] as String?,
+        registrationDate: json['registration_date'] != null
+            ? DateTime.tryParse(json['registration_date'].toString())
             : null,
-        exclusiveMember: json['socio_exclusivo'] as bool? ?? false,
+        partnerExclusive: json['partner_exclusive'] as bool? ?? false,
       );
 
   Map<String, dynamic> toJson() => {
         if (id.isNotEmpty) 'id': id,
-        'id_pessoa': memberId,
+        'member_id': memberId,
         'address_id': addressId,
-        'id_categoria_socio': categoryId,
-        if (numero != null && numero!.isNotEmpty) 'numero': numero,
-        if (datamatricula != null)
-          'datamatricula': datamatricula!.toIso8601String().split('T').first,
-        'inativo': active ? '\x00' : '\x01',
-        'socio_exclusivo': exclusiveMember ? '\x01' : '\x00',
+        'category_id': categoryId,
+        if (number != null && number!.isNotEmpty) 'number': number,
+        if (registrationDate != null)
+          'registration_date': registrationDate!.toIso8601String().split('T').first,
+        'partner_exclusive': partnerExclusive,
       };
 
   Connection copyWith({
@@ -66,9 +65,9 @@ class Connection {
     String? categoryId,
     String? categoryName,
     double? value,
-    String? numero,
-    DateTime? datamatricula,
-    bool? exclusiveMember,
+    String? number,
+    DateTime? registrationDate,
+    bool? partnerExclusive,
   }) =>
       Connection(
         id: id ?? this.id,
@@ -80,8 +79,8 @@ class Connection {
         categoryId: categoryId ?? this.categoryId,
         categoryName: categoryName ?? this.categoryName,
         value: value ?? this.value,
-        numero: numero ?? this.numero,
-        datamatricula: datamatricula ?? this.datamatricula,
-        exclusiveMember: exclusiveMember ?? this.exclusiveMember,
+        number: number ?? this.number,
+        registrationDate: registrationDate ?? this.registrationDate,
+        partnerExclusive: partnerExclusive ?? this.partnerExclusive,
       );
 }
