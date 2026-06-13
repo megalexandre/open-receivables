@@ -3,7 +3,7 @@ import 'package:organizagrana/features/addresses/domain/address.dart';
 import 'package:organizagrana/features/categories/domain/category.dart';
 import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/features/members/domain/member.dart';
-import 'package:organizagrana/shared/errors/app_failure.dart' show ValidationFailure;
+import 'package:organizagrana/shared/errors/app_failure.dart' show ValidationFailure, ApiValidationError;
 import 'package:organizagrana/shared/widgets/form/category_dropdown.dart';
 import 'package:organizagrana/shared/widgets/form/member_autocomplete.dart';
 import 'package:organizagrana/shared/widgets/overlay/app_dialog.dart';
@@ -132,11 +132,25 @@ class _ConnectionFormDialogState extends State<ConnectionFormDialog> {
     } on ValidationFailure catch (e) {
       setState(() {
         _saving = false;
-        _apiError = e.errors.map((err) => err.toString()).join('\n');
+        _apiError = _formatValidationErrors(e.errors);
       });
     } catch (_) {
       if (mounted) Navigator.of(context).pop();
     }
+  }
+
+  String _formatValidationErrors(List<ApiValidationError> errors) {
+    final messages = <String>[];
+
+    for (final error in errors) {
+      if (error.field == 'address_id' && error.errorCode.code == 'E_CONNECTION_INVALID') {
+        messages.add('Já existe uma ligação ativa com este endereço. Escolha outro endereço ou reative a ligação existente.');
+      } else {
+        messages.add(error.errorCode.messageFor({}));
+      }
+    }
+
+    return messages.join('\n');
   }
 
   @override

@@ -12,6 +12,7 @@ enum ApiErrorCode {
   memberDocumentDuplicated('E_MEMBER_DUPLICATED', _memberDocumentDuplicated),
   addressDuplicated('E_ADDRESS_DUPLICATED', _addressDuplicated),
   waterAnalysisDuplicated('E_WATER_ANALYSIS_DUPLICATED', _waterAnalysisDuplicated),
+  connectionInvalid('E_CONNECTION_INVALID', _connectionInvalid),
   unknown('', _unknownMessage);
 
   const ApiErrorCode(this.code, this._messageFn);
@@ -57,5 +58,8 @@ String _addressDuplicated(ErrorParams p) =>
 
 String _waterAnalysisDuplicated(ErrorParams p) =>
     'Já existe uma análise de água cadastrada para a referência ${p['reference']}';
+
+String _connectionInvalid(ErrorParams _) =>
+    'Já existe uma ligação ativa com este endereço';
 
 String _unknownMessage(ErrorParams _) => 'Erro desconhecido';

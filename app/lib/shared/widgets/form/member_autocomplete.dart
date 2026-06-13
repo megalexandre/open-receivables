@@ -15,6 +15,7 @@ class MemberAutocomplete extends StatefulWidget {
     required this.onChanged,
     this.initialValue,
     this.validator,
+    this.label = 'Sócio',
     super.key,
   });
 
@@ -22,6 +23,7 @@ class MemberAutocomplete extends StatefulWidget {
   final ValueChanged<Member?>? onChanged;
   final Member? initialValue;
   final FormFieldValidator<Member>? validator;
+  final String label;
 
   @override
   State<MemberAutocomplete> createState() => _MemberAutocompleteState();
@@ -105,6 +107,7 @@ class _MemberAutocompleteState extends State<MemberAutocomplete> {
               controller: controller,
               focusNode: focusNode,
               decoration: InputDecoration(
+                labelText: widget.label,
                 isDense: true,
                 suffixIcon: _searching
                     ? const Padding(

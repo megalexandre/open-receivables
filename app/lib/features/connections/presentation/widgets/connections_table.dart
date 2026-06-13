@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/shared/widgets/data_display/app_table.dart';
 import 'package:organizagrana/shared/widgets/data_display/money_text.dart';
-import 'package:organizagrana/shared/widgets/data_display/yes_no_badge.dart';
 
 class ConnectionsTable extends StatelessWidget {
   const ConnectionsTable({
@@ -57,9 +56,9 @@ class ConnectionsTable extends StatelessWidget {
           builder: (c) => Text(c.address),
         ),
         AppTableColumn(
-          label: 'Status',
-          sortKey: 'active',
-          builder: (c) => YesNoBadge(value: c.active),
+          label: 'Número',
+          sortKey: 'number',
+          builder: (c) => Text(c.number ?? '-'),
         ),
         AppTableColumn(
           label: 'Categoria',

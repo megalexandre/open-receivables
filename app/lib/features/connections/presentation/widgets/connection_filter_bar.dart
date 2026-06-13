@@ -1,84 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:organizagrana/features/addresses/domain/address.dart';
+import 'package:organizagrana/features/members/domain/member.dart';
+import 'package:organizagrana/shared/widgets/form/member_autocomplete.dart';
 
 class ConnectionFilterBar extends StatefulWidget {
   const ConnectionFilterBar({
     super.key,
-    required this.addresses,
     required this.onFilter,
+    required this.searchMembers,
   });
 
-  final List<Address> addresses;
-  final void Function({String? member, String? address, bool? active}) onFilter;
+  final void Function({String? memberId, String? address, bool? active}) onFilter;
+  final Future<List<Member>> Function(String query) searchMembers;
 
   @override
   State<ConnectionFilterBar> createState() => ConnectionFilterBarState();
 }
 
 class ConnectionFilterBarState extends State<ConnectionFilterBar> {
-  final _memberCtrl = TextEditingController();
-  String? _addressFilter;
+  Member? _memberFilter;
   bool? _activeFilter;
-
-  @override
-  void dispose() {
-    _memberCtrl.dispose();
-    super.dispose();
-  }
 
   void clear() {
     setState(() {
-      _memberCtrl.clear();
-      _addressFilter = null;
+      _memberFilter = null;
       _activeFilter = null;
     });
-    _notifyChanges();
+    _query();
   }
 
-  void _notifyChanges() {
-    final member = _memberCtrl.text.trim();
+  void _query() {
     widget.onFilter(
-      member: member.isEmpty ? null : member,
-      address: _addressFilter,
+      memberId: _memberFilter?.id,
+      address: null,
       active: _activeFilter,
     );
   }
 
+  bool get _hasFilters => _memberFilter != null || _activeFilter != null;
+
   @override
   Widget build(BuildContext context) {
-    final memberField = TextField(
-      controller: _memberCtrl,
-      decoration: const InputDecoration(
-        labelText: 'Sócio',
-        hintText: 'Nome do sócio...',
-        isDense: true,
-      ),
-      onChanged: (_) => _notifyChanges(),
-    );
-
-    final addressField = DropdownButtonFormField<String?>(
-      initialValue: _addressFilter,
-      isExpanded: true,
-      decoration: const InputDecoration(
-        labelText: 'Rua / Endereço',
-        isDense: true,
-      ),
-      items: [
-        const DropdownMenuItem(child: Text('Todas as ruas')),
-        ...widget.addresses.map(
-          (a) => DropdownMenuItem(
-            value: a.id,
-            child: Text(
-              '${a.addressType} ${a.name}',
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ],
-      onChanged: (v) {
-        setState(() => _addressFilter = v);
-        _notifyChanges();
+    final memberField = MemberAutocomplete(
+      search: widget.searchMembers,
+      onChanged: (member) {
+        setState(() => _memberFilter = member);
       },
+      initialValue: _memberFilter,
     );
 
     final statusField = DropdownButtonFormField<bool?>(
@@ -95,8 +62,21 @@ class ConnectionFilterBarState extends State<ConnectionFilterBar> {
       ],
       onChanged: (v) {
         setState(() => _activeFilter = v);
-        _notifyChanges();
       },
+    );
+
+    final actions = Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      spacing: 8,
+      children: [
+        if (_hasFilters)
+          TextButton(onPressed: clear, child: const Text('Limpar')),
+        FilledButton.icon(
+          onPressed: _query,
+          icon: const Icon(Icons.search, size: 16),
+          label: const Text('Consultar'),
+        ),
+      ],
     );
 
     return Card(
@@ -107,15 +87,23 @@ class ConnectionFilterBarState extends State<ConnectionFilterBar> {
             if (constraints.maxWidth < 600) {
               return Column(
                 spacing: 12,
-                children: [memberField, addressField, statusField],
+                children: [
+                  Column(spacing: 12, children: [memberField, statusField]),
+                  actions,
+                ],
               );
             }
-            return Row(
+            return Column(
               spacing: 12,
               children: [
-                Expanded(flex: 4, child: memberField),
-                Expanded(flex: 3, child: addressField),
-                Expanded(flex: 2, child: statusField),
+                Row(
+                  spacing: 12,
+                  children: [
+                    Expanded(flex: 2, child: memberField),
+                    Expanded(child: statusField),
+                  ],
+                ),
+                actions,
               ],
             );
           },

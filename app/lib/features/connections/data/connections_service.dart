@@ -28,7 +28,7 @@ class ConnectionsService {
     int pageSize = 25,
     String? sortBy,
     bool sortAscending = true,
-    String? memberName,
+    String? memberId,
     String? address,
     bool? active,
   }) async {
@@ -38,7 +38,7 @@ class ConnectionsService {
         pageSize: pageSize,
         sortBy: sortBy,
         sortAscending: sortAscending,
-        memberName: memberName,
+        memberId: memberId,
         address: address,
         active: active,
       );

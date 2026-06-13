@@ -46,7 +46,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   bool _hasMore = false;
   String? _error;
 
-  String? _memberFilter;
+  String? _memberIdFilter;
   String? _addressFilter;
   bool? _activeFilter;
 
@@ -69,7 +69,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
         page: _page,
         sortBy: _sortBy,
         sortAscending: _sortAscending,
-        memberName: _memberFilter,
+        memberId: _memberIdFilter,
         address: _addressFilter,
         active: _activeFilter,
       );
@@ -134,9 +134,9 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     _loadMore();
   }
 
-  void _onFilter({String? member, String? address, bool? active}) {
+  void _onFilter({String? memberId, String? address, bool? active}) {
     setState(() {
-      _memberFilter = member;
+      _memberIdFilter = memberId;
       _addressFilter = address;
       _activeFilter = active;
       _reset();
@@ -222,8 +222,8 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
             const SizedBox(height: 24),
             ConnectionFilterBar(
               key: _filterBarKey,
-              addresses: _addresses,
               onFilter: _onFilter,
+              searchMembers: _searchMembers,
             ),
             const SizedBox(height: 16),
             if (_error != null)

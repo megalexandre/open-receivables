@@ -9,7 +9,7 @@ abstract class ConnectionsApiClient {
     int pageSize = 25,
     String? sortBy,
     bool sortAscending = true,
-    String? memberName,
+    String? memberId,
     String? address,
     bool? active,
   });
@@ -30,15 +30,15 @@ class HttpConnectionsApiClient extends BaseHttpResourceClient
     int pageSize = 25,
     String? sortBy,
     bool sortAscending = true,
-    String? memberName,
+    String? memberId,
     String? address,
     bool? active,
   }) {
     final uri = Uri.parse(ApiEndpoints.connections.list).replace(
       queryParameters: {
         ...listParams(page, pageSize, sortBy, sortAscending),
-        if (memberName != null && memberName.isNotEmpty)
-          'memberName': memberName,
+        if (memberId != null && memberId.isNotEmpty)
+          'memberId': memberId,
         if (address != null && address.isNotEmpty) 'addressId': address,
         if (active != null) 'active': '$active',
       },
