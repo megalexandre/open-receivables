@@ -7,6 +7,7 @@ import 'package:organizagrana/features/connections/data/connections_service.dart
 import 'package:organizagrana/features/connections/domain/connection.dart';
 import 'package:organizagrana/features/connections/domain/connection_failure.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connection_delete_dialog.dart';
+import 'package:organizagrana/features/connections/presentation/widgets/connection_filter_bar.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connection_form_dialog.dart';
 import 'package:organizagrana/features/connections/presentation/widgets/connections_table.dart';
 import 'package:organizagrana/features/members/data/members_service.dart';
@@ -32,7 +33,7 @@ class ConnectionsPage extends StatefulWidget {
 }
 
 class _ConnectionsPageState extends State<ConnectionsPage> {
-  final _filtersRowKey = GlobalKey<_FiltersRowState>();
+  final _filterBarKey = GlobalKey<ConnectionFilterBarState>();
   List<Connection> _connections = [];
   List<Address> _addresses = [];
   List<Category> _categories = [];
@@ -140,7 +141,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   }
 
   void _clearFilters() {
-    _filtersRowKey.currentState?.clear();
+    _filterBarKey.currentState?.clear();
     _memberFilter = '';
     _addressFilter = null;
     _activeFilter = null;
@@ -215,19 +216,19 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
               ],
             ),
             const SizedBox(height: 24),
-            _FiltersRow(
-              key: _filtersRowKey,
+            ConnectionFilterBar(
+              key: _filterBarKey,
               addresses: _addresses,
-              onMemberChanged: (v) {
-                _memberFilter = v;
-                _applyFilters();
-              },
-              onAddressChanged: (v) {
-                _addressFilter = v;
-                _applyFilters();
-              },
-              onActiveChanged: (v) {
-                _activeFilter = v;
+              onFiltersChanged: ({
+                required member,
+                required address,
+                required active,
+              }) {
+                setState(() {
+                  _memberFilter = member;
+                  _addressFilter = address;
+                  _activeFilter = active;
+                });
                 _applyFilters();
               },
             ),
@@ -264,122 +265,3 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   }
 }
 
-class _FiltersRow extends StatefulWidget {
-  const _FiltersRow({
-    super.key,
-    required this.addresses,
-    required this.onMemberChanged,
-    required this.onAddressChanged,
-    required this.onActiveChanged,
-  });
-
-  final List<Address> addresses;
-  final void Function(String) onMemberChanged;
-  final void Function(String?) onAddressChanged;
-  final void Function(bool?) onActiveChanged;
-
-  @override
-  State<_FiltersRow> createState() => _FiltersRowState();
-}
-
-class _FiltersRowState extends State<_FiltersRow> {
-  final _memberCtrl = TextEditingController();
-  String? _addressFilter;
-  bool? _activeFilter;
-
-  @override
-  void dispose() {
-    _memberCtrl.dispose();
-    super.dispose();
-  }
-
-  void clear() {
-    setState(() {
-      _memberCtrl.clear();
-      _addressFilter = null;
-      _activeFilter = null;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final memberField = TextField(
-      controller: _memberCtrl,
-      decoration: const InputDecoration(
-        labelText: 'Sócio',
-        hintText: 'Nome do sócio...',
-        isDense: true,
-      ),
-      onChanged: widget.onMemberChanged,
-    );
-
-    final addressField = DropdownButtonFormField<String?>(
-      initialValue: _addressFilter,
-      isExpanded: true,
-      decoration: const InputDecoration(
-        labelText: 'Rua / Endereço',
-        isDense: true,
-      ),
-      items: [
-        const DropdownMenuItem(child: Text('Todas as ruas')),
-        ...widget.addresses.map(
-          (a) => DropdownMenuItem(
-            value: a.id,
-            child: Text(
-              '${a.addressType} ${a.name}',
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ],
-      onChanged: (v) {
-        setState(() => _addressFilter = v);
-        widget.onAddressChanged(v);
-      },
-    );
-
-    final statusField = DropdownButtonFormField<bool?>(
-      initialValue: _activeFilter,
-      isExpanded: true,
-      decoration: const InputDecoration(
-        labelText: 'Status',
-        isDense: true,
-      ),
-      items: const [
-        DropdownMenuItem(child: Text('Todos')),
-        DropdownMenuItem(value: true, child: Text('Sim')),
-        DropdownMenuItem(value: false, child: Text('Não')),
-      ],
-      onChanged: (v) {
-        setState(() => _activeFilter = v);
-        widget.onActiveChanged(v);
-      },
-    );
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Estreito: campos empilhados ocupando 100% (como col-12).
-            if (constraints.maxWidth < 600) {
-              return Column(
-                spacing: 12,
-                children: [memberField, addressField, statusField],
-              );
-            }
-            // Largo: divide a linha em proporção 4/3/2 (como col-*).
-            return Row(
-              spacing: 12,
-              children: [
-                Expanded(flex: 4, child: memberField),
-                Expanded(flex: 3, child: addressField),
-                Expanded(flex: 2, child: statusField),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
