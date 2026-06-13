@@ -39,25 +39,27 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
   List<Category> _categories = [];
   int _total = 0;
   int _page = 1;
-  static const int _pageSize = 5;
+
   String? _sortBy;
   bool _sortAscending = true;
-  bool _loading = true;
+  bool _loading = false;
+  bool _hasMore = false;
   String? _error;
 
-  String _memberFilter = '';
+  String? _memberFilter;
   String? _addressFilter;
   bool? _activeFilter;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _loadMore();
     _loadAddresses();
     _loadCategories();
   }
 
-  Future<void> _load() async {
+  Future<void> _loadMore() async {
+    if (_loading) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -67,14 +69,16 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
         page: _page,
         sortBy: _sortBy,
         sortAscending: _sortAscending,
-        memberName: _memberFilter.isEmpty ? null : _memberFilter,
+        memberName: _memberFilter,
         address: _addressFilter,
         active: _activeFilter,
       );
       if (mounted) {
         setState(() {
-          _connections = result.connections;
+          _connections = [..._connections, ...result.connections];
           _total = result.total;
+          _hasMore = _connections.length < _total;
+          _page++;
           _loading = false;
         });
       }
@@ -85,14 +89,19 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
           _loading = false;
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _loading = false;
-        });
-      }
     }
+  }
+
+  void _reset() {
+    _connections = [];
+    _page = 1;
+    _hasMore = false;
+    _loading = false;
+  }
+
+  void _refresh() {
+    setState(_reset);
+    _loadMore();
   }
 
   Future<void> _loadAddresses() async {
@@ -116,36 +125,27 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     } catch (_) {}
   }
 
-  void _refresh() {
-    setState(() => _page = 1);
-    _load();
-  }
-
-  void _onPageChanged(int page) {
-    setState(() => _page = page);
-    _load();
-  }
-
   void _onSort(String key, bool ascending) {
     setState(() {
       _sortBy = key;
       _sortAscending = ascending;
-      _page = 1;
+      _reset();
     });
-    _load();
+    _loadMore();
   }
 
-  void _applyFilters() {
-    setState(() => _page = 1);
-    _load();
+  void _onFilter({String? member, String? address, bool? active}) {
+    setState(() {
+      _memberFilter = member;
+      _addressFilter = address;
+      _activeFilter = active;
+      _reset();
+    });
+    _loadMore();
   }
 
   void _clearFilters() {
     _filterBarKey.currentState?.clear();
-    _memberFilter = '';
-    _addressFilter = null;
-    _activeFilter = null;
-    _applyFilters();
   }
 
   Future<void> _openForm({Connection? connection}) async {
@@ -219,18 +219,7 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
             ConnectionFilterBar(
               key: _filterBarKey,
               addresses: _addresses,
-              onFiltersChanged: ({
-                required member,
-                required address,
-                required active,
-              }) {
-                setState(() {
-                  _memberFilter = member;
-                  _addressFilter = address;
-                  _activeFilter = active;
-                });
-                _applyFilters();
-              },
+              onFilter: _onFilter,
             ),
             const SizedBox(height: 16),
             if (_error != null)
@@ -244,16 +233,14 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
                   padding: const EdgeInsets.all(16),
                   child: ConnectionsTable(
                     connections: _connections,
-                    total: _total,
-                    page: _page,
-                    pageSize: _pageSize,
-                    onPageChanged: _onPageChanged,
                     onSort: _onSort,
                     sortKey: _sortBy,
                     sortAscending: _sortAscending,
                     onEdit: _onEdit,
                     onDelete: _onDelete,
                     loading: _loading,
+                    onLoadMore: _loadMore,
+                    hasMore: _hasMore,
                   ),
                 ),
               ),

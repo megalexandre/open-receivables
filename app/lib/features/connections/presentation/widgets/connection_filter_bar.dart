@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:organizagrana/features/addresses/domain/address.dart';
 
-typedef ConnectionFiltersChanged = void Function({
-  required String member,
-  required String? address,
-  required bool? active,
-});
-
 class ConnectionFilterBar extends StatefulWidget {
   const ConnectionFilterBar({
     super.key,
     required this.addresses,
-    required this.onFiltersChanged,
+    required this.onFilter,
   });
 
   final List<Address> addresses;
-  final ConnectionFiltersChanged onFiltersChanged;
+  final void Function({String? member, String? address, bool? active}) onFilter;
 
   @override
   State<ConnectionFilterBar> createState() => ConnectionFilterBarState();
@@ -42,8 +36,9 @@ class ConnectionFilterBarState extends State<ConnectionFilterBar> {
   }
 
   void _notifyChanges() {
-    widget.onFiltersChanged(
-      member: _memberCtrl.text,
+    final member = _memberCtrl.text.trim();
+    widget.onFilter(
+      member: member.isEmpty ? null : member,
       address: _addressFilter,
       active: _activeFilter,
     );
