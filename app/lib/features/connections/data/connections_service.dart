@@ -25,7 +25,7 @@ class ConnectionsService {
 
   Future<ConnectionsResult> list({
     int page = 1,
-    int pageSize = 5,
+    int pageSize = 25,
     String? sortBy,
     bool sortAscending = true,
     String? memberName,
@@ -74,6 +74,14 @@ class ConnectionsService {
   Future<void> delete(String id) async {
     try {
       await _apiClient.delete(id);
+    } on AppFailure catch (e) {
+      throw ConnectionFailure(e.type);
+    }
+  }
+
+  Future<void> reactivate(String id) async {
+    try {
+      await _apiClient.reactivate(id);
     } on AppFailure catch (e) {
       throw ConnectionFailure(e.type);
     }

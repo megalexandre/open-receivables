@@ -6,7 +6,7 @@ import 'package:organizagrana/shared/network/http_api_client.dart';
 abstract class ConnectionsApiClient {
   Future<Map<String, dynamic>> list({
     int page = 1,
-    int pageSize = 5,
+    int pageSize = 25,
     String? sortBy,
     bool sortAscending = true,
     String? memberName,
@@ -16,6 +16,7 @@ abstract class ConnectionsApiClient {
   Future<Map<String, dynamic>> create(Connection connection);
   Future<Map<String, dynamic>> update(Connection connection);
   Future<void> delete(String id);
+  Future<Map<String, dynamic>> reactivate(String id);
 }
 
 class HttpConnectionsApiClient extends BaseHttpResourceClient
@@ -26,7 +27,7 @@ class HttpConnectionsApiClient extends BaseHttpResourceClient
   @override
   Future<Map<String, dynamic>> list({
     int page = 1,
-    int pageSize = 5,
+    int pageSize = 25,
     String? sortBy,
     bool sortAscending = true,
     String? memberName,
@@ -65,5 +66,13 @@ class HttpConnectionsApiClient extends BaseHttpResourceClient
   Future<void> delete(String id) => callVoid(
         () => httpClient
             .deleteVoid(Uri.parse(ApiEndpoints.connections.byId(id))),
+      );
+
+  @override
+  Future<Map<String, dynamic>> reactivate(String id) => call(
+        () => httpClient.patchJson(
+          Uri.parse('${ApiEndpoints.connections.byId(id)}/reactivate'),
+          {},
+        ),
       );
 }

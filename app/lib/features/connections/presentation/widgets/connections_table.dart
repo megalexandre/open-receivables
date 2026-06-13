@@ -8,8 +8,8 @@ class ConnectionsTable extends StatelessWidget {
   const ConnectionsTable({
     super.key,
     required this.connections,
-    required this.onEdit,
     required this.onDelete,
+    required this.onReactivate,
     this.onSort,
     this.sortKey,
     this.sortAscending = true,
@@ -19,8 +19,8 @@ class ConnectionsTable extends StatelessWidget {
   });
 
   final List<Connection> connections;
-  final void Function(Connection) onEdit;
   final void Function(Connection) onDelete;
+  final void Function(Connection) onReactivate;
   final void Function(String key, bool ascending)? onSort;
   final String? sortKey;
   final bool sortAscending;
@@ -47,13 +47,13 @@ class ConnectionsTable extends StatelessWidget {
         AppTableColumn(
           label: 'Sócio',
           sortKey: 'memberName',
-          flex: 3,
+          flex: 2,
           builder: (c) => Text(c.memberName),
         ),
         AppTableColumn(
           label: 'Endereço',
           sortKey: 'address',
-          flex: 3,
+          flex: 2,
           builder: (c) => Text(c.address),
         ),
         AppTableColumn(
@@ -64,7 +64,7 @@ class ConnectionsTable extends StatelessWidget {
         AppTableColumn(
           label: 'Categoria',
           sortKey: 'categoryName',
-          flex: 2,
+          flex: 1.2,
           builder: (c) => Text(c.categoryName),
         ),
         AppTableColumn(
@@ -76,25 +76,28 @@ class ConnectionsTable extends StatelessWidget {
         AppTableColumn(
           label: 'Ações',
           showInCard: false,
+          centerTitle: true,
           builder: (c) => Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 16),
-                tooltip: 'Editar',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => onEdit(c),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, size: 16),
-                tooltip: 'Excluir',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => onDelete(c),
-              ),
-            ],
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: c.active
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 16),
+                      tooltip: 'Inativar',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => onDelete(c),
+                    ),
+                  ]
+                : [
+                    IconButton(
+                      icon: const Icon(Icons.restore, size: 16),
+                      tooltip: 'Reativar',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => onReactivate(c),
+                    ),
+                  ],
           ),
         ),
       ],

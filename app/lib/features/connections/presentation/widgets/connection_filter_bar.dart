@@ -90,8 +90,8 @@ class ConnectionFilterBarState extends State<ConnectionFilterBar> {
       ),
       items: const [
         DropdownMenuItem(child: Text('Todos')),
-        DropdownMenuItem(value: true, child: Text('Sim')),
-        DropdownMenuItem(value: false, child: Text('Não')),
+        DropdownMenuItem(value: true, child: Text('Ativos')),
+        DropdownMenuItem(value: false, child: Text('Inativos')),
       ],
       onChanged: (v) {
         setState(() => _activeFilter = v);

@@ -29,19 +29,19 @@ class Connection {
 
   factory Connection.fromJson(Map<String, dynamic> json) => Connection(
         id: json['id'].toString(),
-        memberId: json['member_id']?.toString() ?? '',
-        memberName: json['member_name'] as String,
-        addressId: json['address_id']?.toString() ?? '',
+        memberId: json['memberId']?.toString() ?? '',
+        memberName: json['memberName'] as String,
+        addressId: json['addressId']?.toString() ?? '',
         address: json['address'] as String,
         active: json['active'] as bool,
-        categoryId: json['category_id']?.toString() ?? '',
-        categoryName: json['category_name'] as String,
+        categoryId: json['categoryId']?.toString() ?? '',
+        categoryName: json['categoryName'] as String,
         value: (json['value'] as num).toDouble(),
         number: json['number'] as String?,
-        registrationDate: json['registration_date'] != null
-            ? DateTime.tryParse(json['registration_date'].toString())
+        registrationDate: json['registrationDate'] != null
+            ? DateTime.tryParse(json['registrationDate'].toString())
             : null,
-        partnerExclusive: json['partner_exclusive'] as bool? ?? false,
+        partnerExclusive: json['partnerExclusive'] as bool? ?? false,
       );
 
   Map<String, dynamic> toJson() => {

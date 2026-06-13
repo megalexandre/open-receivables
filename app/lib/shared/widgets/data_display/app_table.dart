@@ -10,6 +10,7 @@ class AppTableColumn<T> {
     this.numeric = false,
     this.showInCard = true,
     this.flex = 1,
+    this.centerTitle = false,
   });
 
   final String label;
@@ -21,6 +22,9 @@ class AppTableColumn<T> {
   /// Proporção de largura em relação às outras colunas (flex 2 = 2x mais
   /// larga que uma coluna flex 1).
   final double flex;
+
+  /// Centraliza o título da coluna.
+  final bool centerTitle;
 }
 
 class AppTable<T> extends StatefulWidget {
@@ -197,12 +201,15 @@ class _AppTableState<T> extends State<AppTable<T>> {
       ),
       ...widget.columns.map((col) {
         final isActions = !col.showInCard;
+        final titleAlign = col.centerTitle
+            ? PlutoColumnTextAlign.center
+            : (col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left);
         return PlutoColumn(
           title: col.label,
           field: _fieldFor(col),
           type: PlutoColumnType.text(),
           textAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
-          titleTextAlign: col.numeric ? PlutoColumnTextAlign.right : PlutoColumnTextAlign.left,
+          titleTextAlign: titleAlign,
           enableSorting: col.sortKey != null && widget.onSort != null,
           enableFilterMenuItem: false,
           enableColumnDrag: false,

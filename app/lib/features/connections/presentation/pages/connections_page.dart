@@ -148,28 +148,32 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
     _filterBarKey.currentState?.clear();
   }
 
-  Future<void> _openForm({Connection? connection}) async {
+  Future<void> _openForm() async {
     final saved = await showConnectionFormDialog(
       context,
-      connection: connection,
+      connection: null,
       searchMembers: _searchMembers,
       addresses: _addresses,
       categories: _categories,
-      onSave: (c) => connection == null
-          ? widget.service.create(c)
-          : widget.service.update(c),
+      onSave: (c) => widget.service.create(c),
     );
     if (saved) _refresh();
   }
-
-  Future<void> _onEdit(Connection connection) =>
-      _openForm(connection: connection);
 
   Future<void> _onDelete(Connection connection) async {
     final confirmed = await showConnectionDeleteDialog(context, connection);
     if (!confirmed) return;
     try {
       await widget.service.delete(connection.id);
+      _refresh();
+    } on ConnectionFailure catch (e) {
+      if (mounted) _showError(e.message);
+    }
+  }
+
+  Future<void> _onReactivate(Connection connection) async {
+    try {
+      await widget.service.reactivate(connection.id);
       _refresh();
     } on ConnectionFailure catch (e) {
       if (mounted) _showError(e.message);
@@ -236,8 +240,8 @@ class _ConnectionsPageState extends State<ConnectionsPage> {
                     onSort: _onSort,
                     sortKey: _sortBy,
                     sortAscending: _sortAscending,
-                    onEdit: _onEdit,
                     onDelete: _onDelete,
+                    onReactivate: _onReactivate,
                     loading: _loading,
                     onLoadMore: _loadMore,
                     hasMore: _hasMore,
