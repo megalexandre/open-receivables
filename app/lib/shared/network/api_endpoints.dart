@@ -1,3 +1,5 @@
+import 'package:organizagrana/shared/config/runtime_config.dart';
+
 part 'endpoints/_auth.dart';
 part 'endpoints/_categories.dart';
 part 'endpoints/_members.dart';
@@ -10,18 +12,15 @@ part 'endpoints/_generate_invoices.dart';
 
 
 class ApiEndpoints {
-  static const _base = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:8080',
-  );
+  static String get _base => RuntimeConfig.apiBaseUrl;
 
-  static const auth = _Auth();
-  static const categories = _Categories();
-  static const members = _Members();
-  static const addresses = _Addresses();
-  static const boletos = _Boletos();
-  static const connections = _Connections();
-  static const waterQuality = _WaterQuality();
-  static const caixa = _Caixa();
-  static const generateInvoices = _GenerateInvoices();
+  static final auth = _Auth();
+  static final categories = _Categories();
+  static final members = _Members();
+  static final addresses = _Addresses();
+  static final boletos = _Boletos();
+  static final connections = _Connections();
+  static final waterQuality = _WaterQuality();
+  static final caixa = _Caixa();
+  static final generateInvoices = _GenerateInvoices();
 }

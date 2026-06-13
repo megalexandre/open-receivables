@@ -1,9 +1,9 @@
 part of '../api_endpoints.dart';
 
 class _Addresses {
-  const _Addresses();
+  _Addresses();
 
-  static const String _path = '${ApiEndpoints._base}/addresses';
+  String get _path => '${ApiEndpoints._base}/addresses';
 
   String get list => _path;
   String get create => _path;

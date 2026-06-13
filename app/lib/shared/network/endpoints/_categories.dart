@@ -1,9 +1,9 @@
 part of '../api_endpoints.dart';
 
 class _Categories {
-  const _Categories();
+  _Categories();
 
-  static const String _path = '${ApiEndpoints._base}/categories';
+  String get _path => '${ApiEndpoints._base}/categories';
 
   String get list => _path;
   String get create => _path;
