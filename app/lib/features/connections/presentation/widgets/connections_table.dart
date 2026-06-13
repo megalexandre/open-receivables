@@ -47,11 +47,13 @@ class ConnectionsTable extends StatelessWidget {
         AppTableColumn(
           label: 'Sócio',
           sortKey: 'memberName',
+          flex: 3,
           builder: (c) => Text(c.memberName),
         ),
         AppTableColumn(
           label: 'Endereço',
           sortKey: 'address',
+          flex: 3,
           builder: (c) => Text(c.address),
         ),
         AppTableColumn(
@@ -62,6 +64,7 @@ class ConnectionsTable extends StatelessWidget {
         AppTableColumn(
           label: 'Categoria',
           sortKey: 'categoryName',
+          flex: 2,
           builder: (c) => Text(c.categoryName),
         ),
         AppTableColumn(
@@ -77,13 +80,18 @@ class ConnectionsTable extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
+                icon: const Icon(Icons.edit_outlined, size: 16),
                 tooltip: 'Editar',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 onPressed: () => onEdit(c),
               ),
+              const SizedBox(width: 4),
               IconButton(
-                icon: const Icon(Icons.delete_outline, size: 18),
+                icon: const Icon(Icons.delete_outline, size: 16),
                 tooltip: 'Excluir',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 onPressed: () => onDelete(c),
               ),
             ],
