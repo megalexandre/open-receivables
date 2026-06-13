@@ -28,13 +28,13 @@ class Connection {
   final bool partnerExclusive;
 
   factory Connection.fromJson(Map<String, dynamic> json) => Connection(
-        id: json['id'] as String,
-        memberId: json['member_id'] as String? ?? '',
+        id: json['id'].toString(),
+        memberId: json['member_id']?.toString() ?? '',
         memberName: json['member_name'] as String,
-        addressId: json['address_id'] as String? ?? '',
+        addressId: json['address_id']?.toString() ?? '',
         address: json['address'] as String,
         active: json['active'] as bool,
-        categoryId: json['category_id'] as String? ?? '',
+        categoryId: json['category_id']?.toString() ?? '',
         categoryName: json['category_name'] as String,
         value: (json['value'] as num).toDouble(),
         number: json['number'] as String?,
